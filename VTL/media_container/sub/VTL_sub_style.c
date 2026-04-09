@@ -1,5 +1,5 @@
 #include <VTL/media_container/sub/VTL_sub_style.h>
-#include <external/parson/parson.h>
+#include <parson/parson.h>
 #include <stdlib.h> // Для strtoul
 #include <string.h> // Для strdup
 #include <VTL/VTL_app_result.h>

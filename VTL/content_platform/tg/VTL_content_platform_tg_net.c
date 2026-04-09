@@ -8,7 +8,7 @@
 #endif
 
 #include <curl/curl.h>
-#include <cjson/cJSON.h>
+#include <parson/parson.h>
 #include <VTL/utils/curl/VTL_http_client.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -42,8 +42,8 @@ static int VTL_content_platform_tg_PrepareBaseUrl(VTL_net_api_data_TG* api, char
 }
 
 // HTTP POST JSON
-static int VTL_content_platform_tg_http_post_json(const char* url, cJSON* body) {
-    char *json = cJSON_PrintUnformatted(body);
+static int VTL_content_platform_tg_http_post_json(const char* url, JSON_Value* body) {
+    char *json = json_serialize_to_string(body);
     if (!json) return 0;
     HttpRequest req = {0};
     req.content_type = "application/json";
@@ -51,7 +51,7 @@ static int VTL_content_platform_tg_http_post_json(const char* url, cJSON* body) 
     HttpResponse resp = {0};
     int ok = VTL_curl_http_client_Request(url, HTTP_POST, &req, &resp);
     VTL_curl_http_client_ResponseCleanup(&resp);
-    free(json);
+    json_free_serialized_string(json);
     return ok;
 }
 
@@ -73,13 +73,14 @@ static int VTL_content_platform_tg_SendMessage(VTL_net_api_data_TG* api) {
     char url[512];
     if (VTL_content_platform_tg_PrepareBaseUrl(api, url, sizeof(url))) return 0;
     strcat(url, "sendMessage");
-    cJSON* root = cJSON_CreateObject();
-    cJSON_AddStringToObject(root, "chat_id", api->chat_id);
-    cJSON_AddStringToObject(root, "text", api->text);
+    JSON_Value* root_val = json_value_init_object();
+    JSON_Object* root = json_value_get_object(root_val);
+    json_object_set_string(root, "chat_id", api->chat_id);
+    json_object_set_string(root, "text", api->text);
     if (api->parse_mode)
-        cJSON_AddStringToObject(root, "parse_mode", api->parse_mode);
-    int ok = VTL_content_platform_tg_http_post_json(url, root);
-    cJSON_Delete(root);
+        json_object_set_string(root, "parse_mode", api->parse_mode);
+    int ok = VTL_content_platform_tg_http_post_json(url, root_val);
+    json_value_free(root_val);
     return ok;
 }
 
@@ -104,19 +105,17 @@ VTL_AppResult VTL_content_platform_tg_marked_text_SendNow(const VTL_Filename fil
     char* txt = VTL_content_platform_tg_LoadFile(file_name);
     if (!txt) return VTL_res_kErr;
     api_data.text = txt;
-    api_data.parse_mode = "MarkdownV2";
+    api_data.parse_mode = NULL;
     int ok = VTL_content_platform_tg_SendMessage(&api_data);
     free(txt);
     return ok ? VTL_res_kOk : VTL_res_kErr;
 }
 
 // Send media (audio, photo, video, etc.)
-static int VTL_content_platform_tg_SendMedia(VTL_net_api_data_TG* api, const char* method, const char* field) 
+static int VTL_content_platform_tg_SendMedia(VTL_net_api_data_TG* api, const char* method, const char* field)
 {
     char url[512];
-    if (VTL_content_platform_tg_PrepareBaseUrl(api, url, sizeof(url))) {
-        return 0;
-    }
+    if (VTL_content_platform_tg_PrepareBaseUrl(api, url, sizeof(url))) return 0;
     strcat(url, method);
 
     struct curl_httppost *form = NULL, *last = NULL;
@@ -179,7 +178,7 @@ VTL_AppResult VTL_content_platform_tg_audio_w_marked_text_SendNow(const VTL_File
     char* txt = VTL_content_platform_tg_LoadFile(text_file_name);
     if (!txt) return VTL_res_kErr;
     api_data.text = txt;
-    api_data.parse_mode = "MarkdownV2";
+    api_data.parse_mode = NULL;
     int ok = VTL_content_platform_tg_SendMedia(&api_data, "sendAudio", "audio");
     free(txt);
     return ok ? VTL_res_kOk : VTL_res_kErr;
@@ -330,44 +329,38 @@ static int VTL_content_platform_tg_SendMediaGroup(
     const char*           caption
 ) {
     char url[512];
-    if (VTL_content_platform_tg_PrepareBaseUrl(api, url, sizeof(url))) {
-        fprintf(stderr, "[ERR] URL preparation failed\n");
-        return 0;
-    }
+    if (VTL_content_platform_tg_PrepareBaseUrl(api, url, sizeof(url))) return 0;
     strcat(url, "sendMediaGroup");
-    fprintf(stderr, "[DBG] URL = %s\n", url);
 
-    cJSON *arr = cJSON_CreateArray();
-    if (!arr) {
-        fprintf(stderr, "[ERR] Failed to create JSON array\n");
-        return 0;
-    }
-    
+    JSON_Value *arr_val = json_value_init_array();
+    JSON_Array *arr = json_value_get_array(arr_val);
+    if (!arr) return 0;
+
     for (size_t i = 0; i < count; ++i) {
-        cJSON *obj = cJSON_CreateObject();
-        cJSON_AddStringToObject(obj, "type", media_type);
-        
+        JSON_Value *obj_val = json_value_init_object();
+        JSON_Object *obj = json_value_get_object(obj_val);
+        json_object_set_string(obj, "type", media_type);
+
         char tag[16], uri[32];
         snprintf(tag, sizeof(tag), "file%zu", i);
         snprintf(uri, sizeof(uri), "attach://%s", tag);
-        cJSON_AddStringToObject(obj, "media", uri);
-        
+        json_object_set_string(obj, "media", uri);
+
         if (i == 0 && caption) {
-            cJSON_AddStringToObject(obj, "caption", caption);
+            json_object_set_string(obj, "caption", caption);
             if (api->parse_mode) {
-                cJSON_AddStringToObject(obj, "parse_mode", api->parse_mode);
+                json_object_set_string(obj, "parse_mode", api->parse_mode);
             }
         }
-        cJSON_AddItemToArray(arr, obj);
+        json_array_append_value(arr, obj_val);
     }
-    
-    char *js = cJSON_PrintUnformatted(arr);
+
+    char *js = json_serialize_to_string(arr_val);
     if (!js) {
-        cJSON_Delete(arr);
-        fprintf(stderr, "[ERR] Failed to print JSON\n");
+        json_value_free(arr_val);
         return 0;
     }
-    cJSON_Delete(arr);
+    json_value_free(arr_val);
 
     struct curl_httppost *form = NULL, *last = NULL;
     
@@ -394,7 +387,7 @@ static int VTL_content_platform_tg_SendMediaGroup(
     HttpResponse resp = {0};
     int ok = VTL_curl_http_client_RequestMultipart(url, form, extra_headers, &resp);
     VTL_curl_http_client_ResponseCleanup(&resp);
-    free(js);
+    json_free_serialized_string(js);
     return ok;
 }
 
@@ -468,7 +461,6 @@ VTL_AppResult VTL_content_platform_tg_mediagroup_video_w_marked_text_SendNow(
 VTL_AppResult VTL_content_platform_tg_mediagroup_audio_SendNow(
     const VTL_Filename file_names[], size_t file_count)
 {
-    fprintf(stderr, "[debug] in mediagroup_audio_SendNow, file_count=%zu\n", file_count);
     VTL_net_api_data_TG api_data; INIT();
     return VTL_content_platform_tg_SendMediaGroup(&api_data, "audio", file_names, file_count, NULL) ? VTL_res_kOk : VTL_res_kErr;
 }

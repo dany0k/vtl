@@ -10,17 +10,33 @@ add_compile_definitions(_POSIX_C_SOURCE=200809L)
 # Add compiler flags
 add_compile_options(-Wno-implicit-function-declaration)
 
-# Add system include paths
-include_directories(SYSTEM /usr/include)
+# ============================================================
+# External libraries (все из папки проекта)
+# ============================================================
 
+# FFmpeg — prebuilt static из external_libs/ffmpeg
 include(cmake/FFmpeg.cmake)
+
+# curl — shared из external_libs/curl
+set(CURL_ROOT "${CMAKE_SOURCE_DIR}/external_libs/curl")
+
+# OpenSSL — shared из external_libs/openssl
+set(OPENSSL_ROOT "${CMAKE_SOURCE_DIR}/external_libs/openssl")
+
+# PostgreSQL (libpq) — shared из external_libs/postgresql
+set(PQ_ROOT "${CMAKE_SOURCE_DIR}/external_libs/postgresql")
+
+# parson (JSON) — единственная JSON-библиотека, собирается из исходников
+set(PARSON_ROOT "${CMAKE_SOURCE_DIR}/external_sources/parson")
+
+# ============================================================
 
 set(AppName ${CMAKE_PROJECT_NAME})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/app )
 
 
-set(VTL_CMAKE_UTILS_SRC_FILES 
+set(VTL_CMAKE_UTILS_SRC_FILES
 
     VTL/utils/VTL_time.c
     VTL/utils/VTL_file.c
@@ -40,11 +56,11 @@ set(VTL_CMAKE_USER_SRC_FILES
 
     VTL/user/VTL_user_data.c
     VTL/user/history/VTL_user_history_data.c
-    VTL/user/history/db/VTL_user_history_save.c    
+    VTL/user/history/db/VTL_user_history_save.c
 
     )
 
-set(VTL_CMAKE_PUBLICATION_TEXT_SRC_FILES 
+set(VTL_CMAKE_PUBLICATION_TEXT_SRC_FILES
 
     VTL/publication/text/VTL_publication_text_data.c
     VTL/publication/text/VTL_publication_text_op.c
@@ -54,7 +70,7 @@ set(VTL_CMAKE_PUBLICATION_TEXT_SRC_FILES
 
     )
 
-set(VTL_CMAKE_PUBLICATION_SRC_FILES 
+set(VTL_CMAKE_PUBLICATION_SRC_FILES
 
     ${VTL_CMAKE_PUBLICATION_TEXT_SRC_FILES}
     VTL/content_platform/tg/VTL_content_platform_tg_net.c
@@ -64,7 +80,7 @@ set(VTL_CMAKE_PUBLICATION_SRC_FILES
     )
 
 
-set(VTL_CMAKE_MEDIA_CONTAINER_AUDIO_SRC_FILES 
+set(VTL_CMAKE_MEDIA_CONTAINER_AUDIO_SRC_FILES
 
     VTL/media_container/audio/VTL_audio_data.c
     VTL/media_container/audio/infra/VTL_audio_read.c
@@ -72,12 +88,12 @@ set(VTL_CMAKE_MEDIA_CONTAINER_AUDIO_SRC_FILES
 
     )
 
-set(VTL_CMAKE_MEDIA_CONTAINER_VIDEO_SRC_FILES 
+set(VTL_CMAKE_MEDIA_CONTAINER_VIDEO_SRC_FILES
 
     VTL/media_container/video/VTL_video_data.c
     )
 
-set(VTL_CMAKE_MEDIA_CONTAINER_IMG_SRC_FILES 
+set(VTL_CMAKE_MEDIA_CONTAINER_IMG_SRC_FILES
     VTL/media_container/img/VTL_img_core.c
     VTL/media_container/img/VTL_img_filters.c
     VTL/media_container/img/VTL_img_utils.c
@@ -95,7 +111,7 @@ set(VTL_CMAKE_MEDIA_CONTAINER_SUB_SRC_FILES
 )
 
 set(VTL_CMAKE_EXTERNAL_SRC_FILES
-    external/parson/parson.c
+    external_sources/parson/parson.c
 )
 set(VTL_CMAKE_MEDIA_CONTAINER_SRC_FILES
 
@@ -107,7 +123,7 @@ set(VTL_CMAKE_MEDIA_CONTAINER_SRC_FILES
     )
 
 set(VTL_CMAKE_CONTENT_PLATFORM_TG_SRC_FILES
-    
+
     VTL/content_platform/tg/media_container_params/VTL_content_platform_tg_params_audio.c
     VTL/content_platform/tg/media_container_params/VTL_content_platform_tg_params_sub.c
     VTL/content_platform/tg/media_container_params/VTL_content_platform_tg_params_video.c
@@ -119,7 +135,7 @@ set(VTL_CMAKE_CONTENT_PLATFORM_REDDIT_SRC_FILES
     VTL/content_platform/reddit/VTL_content_platform_reddit_net.c
 )
 set(VTL_CMAKE_CONTENT_PLATFORM_SRC_FILES
-    
+
     ${VTL_CMAKE_CONTENT_PLATFORM_TG_SRC_FILES}
     VTL/content_platform/VTL_content_platform_flags_check.c
     VTL/content_platform/infra/audio/VTL_audio_gen.c
@@ -140,8 +156,17 @@ add_executable(${AppName}
     ${VTL_CMAKE_EXTERNAL_SRC_FILES}
     main.c)
 
-# Link FFmpeg
-target_link_libraries(${AppName} PRIVATE ffmpeg VTL_img m curl cjson pq ssl crypto)
+# Все внешние библиотеки — из external_libs / external_sources
+target_link_directories(${AppName} PRIVATE
+    "${CURL_ROOT}/lib"
+    "${OPENSSL_ROOT}/lib"
+    "${PQ_ROOT}/lib"
+)
+target_link_libraries(${AppName} PRIVATE
+    ffmpeg VTL_img m
+    curl ssl crypto pq
+    pthread dl
+)
 
 target_include_directories(${AppName}
     PRIVATE
@@ -149,10 +174,10 @@ target_include_directories(${AppName}
     ${CMAKE_SOURCE_DIR}/VTL
     ${CMAKE_SOURCE_DIR}/VTL/user
     ${CMAKE_SOURCE_DIR}/VTL/user/history
-    ${CMAKE_SOURCE_DIR}/external
-    SYSTEM
-    /usr/include
-    /usr/include/postgresql
+    ${CMAKE_SOURCE_DIR}/external_sources
+    ${CURL_ROOT}/include
+    ${OPENSSL_ROOT}/include
+    ${PQ_ROOT}/include
 )
 
 enable_testing()

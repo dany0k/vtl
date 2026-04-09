@@ -5,8 +5,10 @@ app/
 
 # IDE / tooling
 .claude/
+CLAUDE.md
 .idea/
 .vscode/
+cmake-build-*/
 __pycache__/
 
 # Temp files

@@ -1,24 +1,29 @@
-# FFmpeg.cmake — minimal-working branch
+# FFmpeg.cmake
 #
-# Использует системный FFmpeg через pkg-config вместо сборки из external/ffmpeg.
-# Зачем: сборка FFmpeg из исходников (ExternalProject_Add) в минимальной рабочей
-# ветке не нужна и ломает сборку в WSL/Linux. Системный FFmpeg ставится через apt:
-#   sudo apt install -y libavcodec-dev libavformat-dev libavfilter-dev libswscale-dev libavutil-dev
-#
-# Создаёт INTERFACE-таргет 'ffmpeg', который ожидает корневой CMakeLists.txt.
+# Подключает FFmpeg из external_libs/ffmpeg (shared libraries).
+# Создаёт INTERFACE-таргет 'ffmpeg'.
 
-find_package(PkgConfig REQUIRED)
-
-pkg_check_modules(FFMPEG_SYS REQUIRED IMPORTED_TARGET
-    libavcodec
-    libavformat
-    libavfilter
-    libavutil
-    libswscale
-    libswresample
-)
+set(FFMPEG_LIB_DIR "${CMAKE_SOURCE_DIR}/external_libs/ffmpeg/lib")
+set(FFMPEG_INC_DIR "${CMAKE_SOURCE_DIR}/external_libs/ffmpeg/include")
 
 add_library(ffmpeg INTERFACE)
-target_link_libraries(ffmpeg INTERFACE PkgConfig::FFMPEG_SYS)
 
-message(STATUS "FFmpeg: using system libraries via pkg-config (libavcodec )")
+target_include_directories(ffmpeg INTERFACE "${FFMPEG_INC_DIR}")
+
+target_link_directories(ffmpeg INTERFACE "${FFMPEG_LIB_DIR}")
+
+target_link_libraries(ffmpeg INTERFACE
+    avfilter avformat avcodec swscale swresample avutil
+    m pthread
+)
+
+# RPATH — чтобы исполняемый файл находил .so из external_libs при запуске
+set(CMAKE_INSTALL_RPATH
+    "${FFMPEG_LIB_DIR}"
+    "${CMAKE_SOURCE_DIR}/external_libs/curl/lib"
+    "${CMAKE_SOURCE_DIR}/external_libs/openssl/lib"
+    "${CMAKE_SOURCE_DIR}/external_libs/postgresql/lib"
+)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
+message(STATUS "FFmpeg: using shared libraries from external_libs/ffmpeg")
