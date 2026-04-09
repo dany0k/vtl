@@ -28,6 +28,7 @@ set(VTL_CMAKE_UTILS_SRC_FILES
 
     VTL/utils/log/VTL_console_log.c
     VTL/utils/curl/VTL_http_client.c
+    VTL/utils/http_client.c
 
     VTL/utils/db/VTL_db_credentals.c
     VTL/utils/db/VTL_db_connection.c
@@ -113,6 +114,10 @@ set(VTL_CMAKE_CONTENT_PLATFORM_TG_SRC_FILES
     VTL/content_platform/infra/text/VTL_text_configs_for_gen_init.c
     )
 
+
+set(VTL_CMAKE_CONTENT_PLATFORM_REDDIT_SRC_FILES
+    VTL/content_platform/reddit/VTL_content_platform_reddit_net.c
+)
 set(VTL_CMAKE_CONTENT_PLATFORM_SRC_FILES
     
     ${VTL_CMAKE_CONTENT_PLATFORM_TG_SRC_FILES}
@@ -121,6 +126,7 @@ set(VTL_CMAKE_CONTENT_PLATFORM_SRC_FILES
     VTL/content_platform/infra/audio/VTL_audio_configs_for_gen_init.c
     VTL/content_platform/infra/text/VTL_publication_text_gen.c
     VTL/content_platform/VTL_content_platform_publication.c
+    ${VTL_CMAKE_CONTENT_PLATFORM_REDDIT_SRC_FILES}
     )
 
 add_subdirectory(VTL/media_container/img)
