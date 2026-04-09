@@ -13,7 +13,6 @@ __pycache__/
 
 # Temp files
 *.log
-*.mp3
 
 # Test outputs
 text.md
