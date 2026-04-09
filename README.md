@@ -11,6 +11,106 @@
 - **Reddit** — модуль публикации через Reddit API
 - **БД** — сохранение истории публикаций в PostgreSQL
 
+## Быстрый старт
+
+### 1. Клонирование
+
+```bash
+git clone <url-репозитория>
+cd vtl
+```
+
+### 2. Вариант A: Сборка из терминала (Linux / WSL Ubuntu)
+
+```bash
+mkdir build && cd build
+cmake ..
+cmake --build .
+```
+
+Исполняемый файл появится в `app/VTL`.
+
+### 3. Вариант B: Сборка из CLion (Windows + WSL)
+
+#### Первоначальная настройка (один раз)
+
+1. Установите WSL Ubuntu, если не установлен:
+   ```powershell
+   wsl --install -d Ubuntu
+   ```
+
+2. В CLion откройте проект (`File -> Open` -> папка `vtl`)
+
+3. Настройте WSL-тулчейн:
+   - `Settings -> Build, Execution, Deployment -> Toolchains`
+   - Нажмите `+`, выберите **WSL**
+   - Выберите дистрибутив **Ubuntu**
+   - Дождитесь пока CLion обнаружит CMake, gcc, g++
+   - Перетащите WSL-тулчейн **вверх списка** (чтобы стал дефолтным)
+
+4. Убедитесь что CMake использует WSL:
+   - `Settings -> Build, Execution, Deployment -> CMake`
+   - Поле **Toolchain** должно быть **WSL** (или WSL Ubuntu)
+
+5. Настройте конфигурацию запуска:
+   - `Run -> Edit Configurations...`
+   - Выберите таргет **VTL**
+   - **Working directory**: `$ProjectFileDir$` (обязательно! иначе не найдёт файлы)
+   - **Environment variables**: `TG_BOT_TOKEN=<токен>;TG_CHAT_ID=<chat_id>`
+
+6. Нажмите **File -> Reload CMake Project** (или кнопку Reload в панели CMake внизу)
+
+#### Сборка и запуск
+
+- **Build**: `Ctrl+F9` или кнопка Build (молоток)
+- **Run**: `Shift+F10` или кнопка Run (зелёный треугольник)
+
+#### Если что-то пошло не так
+
+- Ошибка `No such file or directory` при сборке — **File -> Reload CMake Project**
+- Segfault (exit code 139) — проверьте что Working directory = `$ProjectFileDir$`
+- Программа зависает — проверьте что в WSL доступен `api.telegram.org`:
+  ```bash
+  wsl curl -s https://api.telegram.org
+  ```
+  Если нет — добавьте в WSL файл `/etc/hosts`:
+  ```
+  149.154.167.220 api.telegram.org
+  ```
+  И в `C:\Users\<user>\.wslconfig`:
+  ```ini
+  [wsl2]
+  networkingMode=mirrored
+  ```
+  После чего перезапустите WSL: `wsl --shutdown` и откройте заново.
+
+### 4. Запуск
+
+Перед запуском создайте файл `text.md` в корне проекта с текстом публикации:
+
+```
+Привет из VTL!
+```
+
+Задайте переменные окружения для Telegram:
+
+```bash
+export TG_BOT_TOKEN="<токен бота>"
+export TG_CHAT_ID="<id чата>"
+./app/VTL
+```
+
+Программа:
+1. Читает `text.md`, генерирует форматированные файлы (`.t_md`, `.html`)
+2. Отправляет текст как сообщение в Telegram
+3. Отправляет аудиофайл в Telegram с подписью из `text.md`
+
+Для получения `TG_CHAT_ID` — напишите боту в Telegram, затем:
+```bash
+curl https://api.telegram.org/bot<TOKEN>/getUpdates
+```
+В ответе найдите `"chat":{"id": ...}`.
+
 ## Структура проекта
 
 ```
@@ -36,59 +136,9 @@ external_libs/
   postgresql/            — libpq (shared library + headers)
 ```
 
-## Сборка
-
-### Требования
-
-- CMake >= 3.25
-- GCC с поддержкой C11
-- Linux / WSL (Ubuntu)
-
-### Команды
-
-```bash
-mkdir build && cd build
-cmake ..
-cmake --build .
-```
-
-Исполняемый файл: `app/VTL`
-
-### Сборка и запуск из CLion
-
-1. Settings -> Build -> Toolchains -> добавить WSL (Ubuntu)
-2. Settings -> Build -> CMake -> Toolchain: WSL
-3. Run/Debug Configuration -> Working directory: `$ProjectFileDir$`
-4. Environment variables: `TG_BOT_TOKEN=...;TG_CHAT_ID=...`
-
-## Запуск
-
-```bash
-export TG_BOT_TOKEN="<токен бота>"
-export TG_CHAT_ID="<id чата>"
-./app/VTL
-```
-
-Программа:
-1. Читает `text.md` и генерирует форматированные файлы (`.t_md`, `.html`)
-2. Отправляет текст в Telegram
-3. Отправляет аудиофайл в Telegram с подписью
-
-## Тестирование обработки изображений
-
-```bash
-mkdir -p test_images
-cp doc/Lenna.png test_images/
-cp doc/main.c .
-cmake --build build
-./app/VTL
-```
-
-Результат: `test_images/Lenna_processed.png`
-
 ## Внешние библиотеки
 
-Все внешние библиотеки находятся в папке проекта и подключаются через CMake:
+Все внешние библиотеки находятся в папке проекта и подключаются через CMake. Никаких системных зависимостей кроме стандартной libc и toolchain.
 
 | Библиотека | Расположение | Назначение |
 |---|---|---|
