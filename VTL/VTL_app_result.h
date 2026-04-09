@@ -37,6 +37,40 @@ typedef enum _VTL_AppResult
     VTL_res_kEncoderNeedsMoreFrames,
     VTL_res_kEncoderFlushComplete,
 
+    /* добавлено из fedorov-subtitles-macOS (субтитры Федорова) */
+    VTL_res_kUnsupportedFormat = 50,
+    VTL_res_kParseError,
+    VTL_res_kMemoryError,
+    VTL_res_kArgumentError,
+    VTL_res_kIOError,
+    VTL_res_kUnknownError,
+
+    VTL_res_kNullArgument = 100,
+    VTL_res_kAllocError,
+    VTL_res_kEndOfFile,
+
+    VTL_res_kSubtitleTimeParseError = 110,
+    VTL_res_kSubtitleFormatError,
+    VTL_res_kSubtitleTextOverflow,
+    VTL_res_kSubInit,
+
+    VTL_res_burn_kOpenInputFileError = 200,
+    VTL_res_burn_kCreateOutputContextError,
+    VTL_res_burn_kCreateOutputStreamError,
+    VTL_res_burn_kInitFiltersError,
+    VTL_res_burn_kSetupVideoEncoderError,
+    VTL_res_burn_kSetupAudioEncoderError,
+    VTL_res_burn_kOpenOutputFileError,
+    VTL_res_burn_kWriteHeaderError,
+
+    VTL_res_convert_kOpenInputFileError = 220,
+    VTL_res_convert_kReadMetaError,
+    VTL_res_convert_kOpenOutputFileError,
+    VTL_res_convert_kWritePartError,
+    VTL_res_convert_kAllocError,
+
+    VTL_res_style_kJsonParseError = 240,
+
 } VTL_AppResult;
 
 

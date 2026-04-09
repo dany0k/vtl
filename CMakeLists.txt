@@ -5,6 +5,7 @@ project(VTL C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
+add_compile_definitions(_POSIX_C_SOURCE=200809L)
 
 # Add compiler flags
 add_compile_options(-Wno-implicit-function-declaration)
@@ -81,11 +82,26 @@ set(VTL_CMAKE_MEDIA_CONTAINER_IMG_SRC_FILES
     VTL/media_container/img/VTL_img_utils.c
 )
 
+
+set(VTL_CMAKE_MEDIA_CONTAINER_SUB_SRC_FILES
+    VTL/media_container/sub/VTL_sub_data.c
+    VTL/media_container/sub/VTL_sub_burn.c
+    VTL/media_container/sub/VTL_sub_convert.c
+    VTL/media_container/sub/VTL_sub_parse.c
+    VTL/media_container/sub/VTL_sub_style.c
+    VTL/media_container/sub/infra/VTL_sub_read.c
+    VTL/media_container/sub/infra/VTL_sub_write.c
+)
+
+set(VTL_CMAKE_EXTERNAL_SRC_FILES
+    external/parson/parson.c
+)
 set(VTL_CMAKE_MEDIA_CONTAINER_SRC_FILES
 
     ${VTL_CMAKE_MEDIA_CONTAINER_AUDIO_SRC_FILES}
     ${VTL_CMAKE_MEDIA_CONTAINER_VIDEO_SRC_FILES}
     ${VTL_CMAKE_MEDIA_CONTAINER_IMG_SRC_FILES}
+    ${VTL_CMAKE_MEDIA_CONTAINER_SUB_SRC_FILES}
 
     )
 
@@ -115,6 +131,7 @@ add_executable(${AppName}
     ${VTL_CMAKE_PUBLICATION_SRC_FILES}
     ${VTL_CMAKE_MEDIA_CONTAINER_SRC_FILES}
     ${VTL_CMAKE_CONTENT_PLATFORM_SRC_FILES}
+    ${VTL_CMAKE_EXTERNAL_SRC_FILES}
     main.c)
 
 # Link FFmpeg
@@ -126,6 +143,7 @@ target_include_directories(${AppName}
     ${CMAKE_SOURCE_DIR}/VTL
     ${CMAKE_SOURCE_DIR}/VTL/user
     ${CMAKE_SOURCE_DIR}/VTL/user/history
+    ${CMAKE_SOURCE_DIR}/external
     SYSTEM
     /usr/include
     /usr/include/postgresql
