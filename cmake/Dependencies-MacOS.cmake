@@ -70,6 +70,7 @@ set_target_properties(PostgreSQL::PostgreSQL PROPERTIES
 # ============================================================
 find_program(_VTL_INSTALL_NAME_TOOL install_name_tool REQUIRED)
 find_program(_VTL_OTOOL otool REQUIRED)
+find_program(_VTL_CODESIGN codesign REQUIRED)
 
 file(GLOB _VTL_MAC_DYLIBS "${MAC_LIB}/*.dylib")
 foreach(dylib ${_VTL_MAC_DYLIBS})
@@ -95,6 +96,13 @@ foreach(dylib ${_VTL_MAC_DYLIBS})
             OUTPUT_QUIET ERROR_QUIET
         )
     endforeach()
+
+    # 3. После install_name_tool подпись dylib становится invalid — на
+    #    Apple Silicon это приводит к 'zsh: killed' при загрузке. Re-sign ad-hoc.
+    execute_process(
+        COMMAND "${_VTL_CODESIGN}" --force --sign - "${dylib}"
+        OUTPUT_QUIET ERROR_QUIET
+    )
 endforeach()
 
 # RPATH бинаря: ищем .dylib через @executable_path относительно app/

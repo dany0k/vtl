@@ -1,201 +1,74 @@
 # VTL — Video/Text/Audio publication Library
 
-Библиотека на C11 для автоматической публикации медиаконтента (текст, аудио, видео, изображения) на различные контент-платформы: Telegram, Reddit, Web и другие.
+Библиотека на C11 для автоматической публикации медиаконтента (текст, аудио, видео, изображения) в Telegram, Reddit и другие платформы.
 
 ## Возможности
 
-- **Текстовый пайплайн** — генерация текстовых файлов в форматах Telegram MarkdownV2, HTML, BBCode; отправка в Telegram
-- **Аудио пайплайн** — чтение, перекодирование (FFmpeg) и отправка аудиофайлов с подписью в Telegram
-- **Видео** — структура для видеоконтейнеров и субтитров (SRT парсинг, наложение, конвертация, стилизация)
-- **Изображения** — обработка через FFmpeg (фильтры, утилиты)
-- **Reddit** — модуль публикации через Reddit API
-- **БД** — сохранение истории публикаций в PostgreSQL
+- Текст: Telegram MarkdownV2, HTML, BBCode → отправка в Telegram
+- Аудио: чтение, перекодирование через FFmpeg, отправка с подписью
+- Видео и субтитры: SRT парсинг, наложение, конвертация
+- Изображения: фильтры и утилиты через FFmpeg
+- Reddit API, история публикаций в PostgreSQL
 
-## Быстрый старт
+## Сборка
 
-### 1. Клонирование
+Все библиотеки (FFmpeg, libcurl, OpenSSL, libpq) лежат прямо в `external_libs/`. Нужен только компилятор C11 и CMake — никаких `apt install ffmpeg` / `brew install` / `vcpkg`.
 
 ```bash
-git clone <url-репозитория>
+git clone <url>
 cd vtl
-```
-
-### 2. Сборка
-
-#### Toolchain
-
-На любой Linux нужен только **компилятор C11 и CMake**. Никаких apt/brew/vcpkg-установок библиотек проекта.
-
-| Платформа | Команда установки toolchain |
-|---|---|
-| Ubuntu / Debian / WSL | `sudo apt install build-essential cmake` |
-| Fedora / RHEL | `sudo dnf install gcc make cmake` |
-| Arch | `sudo pacman -S base-devel cmake` |
-
-#### Команда
-
-```bash
 cmake -S . -B build
 cmake --build build
-./run.sh
+./app/VTL              # на Windows: .\app\VTL.exe
 ```
 
-Все библиотеки берутся из `external_libs/` через `IMPORTED`-таргеты + `RUNPATH`. `run.sh` дополнительно ставит `LD_LIBRARY_PATH` — нужно для транзитивных FFmpeg-deps на Linux.
+### Toolchain (если ещё не стоит)
 
-⚠️ FFmpeg-shared-libs из `external_libs/` тянут транзитивно `libvpx`, `libdav1d`, `libopus`, `libmp3lame` и ещё ~50 опциональных кодеков. На обычной Ubuntu Desktop / любой dev-машине с мультимедиа-стеком они уже стоят. На голом server-Ubuntu без них программа упадёт на runtime — доставьте `apt install ffmpeg` (это подтянет deps, но не сами библиотеки проекта — те остаются из репо).
+| ОС | Команда |
+|---|---|
+| Ubuntu / Debian | `sudo apt install build-essential cmake` |
+| Fedora | `sudo dnf install gcc make cmake` |
+| Arch | `sudo pacman -S base-devel cmake` |
+| macOS | `xcode-select --install` (даёт clang + cmake) |
+| Windows | MinGW-w64 c [winlibs.com](https://winlibs.com/) + [cmake.org](https://cmake.org/download/) |
 
-#### Поддерживаемые платформы
+### Поддерживаемые платформы
 
-| Платформа | Полная сборка | Файлы в репо |
-|---|---|---|
-| Linux x86_64 (Ubuntu / Debian / Fedora / Arch) | ✅ | `external_libs/{ffmpeg,curl,openssl,postgresql}/lib/*.so` |
-| WSL Ubuntu | ✅ | (Linux x86_64 под капотом) |
-| Windows x86_64 (MinGW, например winlibs.com) | ✅ | `external_libs/windows/{bin,lib,include}/` |
-| macOS arm64 (Apple Silicon, Sonoma+) | ✅ | `external_libs/macos/{lib,include}/` |
-| Windows + MSVC | ❌ pthread не поддерживается | — |
+Linux x86_64 · macOS arm64 (Apple Silicon, Sonoma+) · Windows x86_64 (MinGW). MSVC не поддерживается.
 
-Под каждую систему — **та же команда** `cmake -S . -B build && cmake --build build`. CMake сам выбирает нужный набор `IMPORTED`-таргетов по `CMAKE_SYSTEM_NAME`.
+## Запуск
 
-```bash
-# Linux (Ubuntu пример) — нужен только toolchain
-sudo apt install build-essential cmake
-cmake -S . -B build && cmake --build build
-./app/VTL
+В корне проекта должны лежать:
 
-# macOS — нужен Xcode Command Line Tools (даёт clang + cmake)
-xcode-select --install
-cmake -S . -B build && cmake --build build
-./app/VTL
+- `text.md` — текст публикации (любой, например `Привет из VTL!`)
+- Три mp3-файла (имена жёстко прописаны в `main.c`): `audio_ariel.mp3`, `audio_styuardessa.mp3`, `audio_xanadu.mp3`. В репо их нет (`*.mp3` исключены), положить вручную.
 
-# Windows — нужен MinGW-w64 (например с winlibs.com — без MSYS2)
-cmake -S . -B build && cmake --build build
-.\app\VTL.exe
-```
-
-### 3. Сборка из CLion (опционально — для Windows через WSL)
-
-Если работаете в CLion на Windows и не хотите возиться с MinGW — собирайте через WSL-тулчейн.
-
-1. Установите WSL Ubuntu и Linux-зависимости (см. § 2 → Linux / WSL Ubuntu)
-
-2. В CLion: `File -> Open` → папка проекта
-
-3. `Settings -> Build, Execution, Deployment -> Toolchains` → `+` → **WSL** → выберите **Ubuntu** → перетащите вверх
-
-4. `Settings -> Build, Execution, Deployment -> CMake` → **Toolchain** = WSL
-
-5. `Run -> Edit Configurations...` → таргет **VTL**:
-   - **Working directory**: `$ProjectFileDir$` (обязательно — иначе не найдёт `text.md`)
-   - **Environment variables**: `TG_BOT_TOKEN=<токен>;TG_CHAT_ID=<chat_id>`
-
-6. `File -> Reload CMake Project`
-
-7. **Build** `Ctrl+F9`, **Run** `Shift+F10`
-
-**Если что-то пошло не так:**
-
-- `No such file or directory` при сборке — `File -> Reload CMake Project`
-- Segfault (exit 139) — проверьте Working directory = `$ProjectFileDir$`
-- Зависает при отправке в Telegram — проверьте доступ из WSL:
-  ```bash
-  wsl curl -s https://api.telegram.org
-  ```
-  Нет? Добавьте в WSL `/etc/hosts`:
-  ```
-  149.154.167.220 api.telegram.org
-  ```
-  И в `C:\Users\<user>\.wslconfig`:
-  ```ini
-  [wsl2]
-  networkingMode=mirrored
-  ```
-  Перезапустите: `wsl --shutdown`.
-
-### 4. Запуск
-
-#### Что должно лежать в корне проекта
-
-- **`text.md`** — текст публикации. Пример:
-  ```
-  Привет из VTL!
-  ```
-- **Три аудиофайла** (имена жёстко прописаны в `main.c`):
-  - `audio_ariel.mp3`
-  - `audio_styuardessa.mp3`
-  - `audio_xanadu.mp3`
-
-  Можно положить любые `mp3` с такими именами. Без них Audio Pipeline вернёт ошибку.
-  В репозиторий они **не закоммичены** (`*.mp3` исключены) — нужно положить вручную.
-
-#### Переменные окружения
+Переменные окружения для Telegram:
 
 ```bash
-export TG_BOT_TOKEN="<токен бота>"
-export TG_CHAT_ID="<id чата>"
+export TG_BOT_TOKEN="<токен от @BotFather>"
+export TG_CHAT_ID="<id из getUpdates>"
 ./app/VTL
 ```
 
-**Получение `TG_BOT_TOKEN`:**
-
-1. В Telegram напишите `@BotFather`
-2. Команда `/newbot`, задайте имя и username бота
-3. BotFather пришлёт токен вида `123456789:ABCdefGhIJklmNOpqrSTUvwxyz`
-
-**Получение `TG_CHAT_ID`:**
-
-Напишите своему боту любое сообщение, затем:
-```bash
-curl https://api.telegram.org/bot<TOKEN>/getUpdates
-```
-В ответе найдите `"chat":{"id": ...}`.
-
-#### Что делает программа
-
-1. **Text Pipeline** — читает `text.md`, генерирует `.t_md` / `.html`, отправляет в Telegram
-2. **Audio Pipeline** — отправляет один из аудиофайлов в Telegram с подписью из `text.md`
+Получить `TG_BOT_TOKEN`: написать `@BotFather` → `/newbot`.
+Получить `TG_CHAT_ID`: написать своему боту любое сообщение и открыть `https://api.telegram.org/bot<TOKEN>/getUpdates` — там `"chat":{"id":...}`.
 
 ## Структура проекта
 
 ```
 VTL/
-  publication/           — пайплайн публикации (текст, аудио)
-    text/
-      asciidoc/          — параллельный парсер AsciiDoc
-      bbcode/            — парсер BBCode
-      infra/             — чтение/запись текстовых файлов
-  content_platform/
-    tg/                  — Telegram Bot API (sendMessage, sendAudio, sendMediaGroup, ...)
-    reddit/              — Reddit API
-    infra/               — конфигурации платформ (аудио-параметры, текстовые конфиги)
-  media_container/
-    audio/               — аудио: чтение, запись, перекодирование
-    video/               — видео: данные
-    img/                 — изображения: ядро, фильтры, утилиты
-    sub/                 — субтитры: SRT парсинг, наложение, конвертация, стили
-  user/                  — пользователь и история публикаций
-  utils/                 — файлы, строки, шифрование, логирование, HTTP-клиент, БД
-external_sources/
-  parson/                — JSON-библиотека (единственная, собирается из исходников)
-external_libs/
-  ffmpeg/                — FFmpeg (shared libraries + headers)
-  curl/                  — libcurl (shared library + headers)
-  openssl/               — OpenSSL (shared libraries + headers)
-  postgresql/            — libpq (shared library + headers)
+  publication/        — пайплайн публикации (текст, аудио)
+    text/{asciidoc,bbcode,infra}/
+  content_platform/   — Telegram, Reddit, конфиги платформ
+  media_container/    — аудио, видео, субтитры, изображения
+  user/               — история публикаций
+  utils/              — файлы, строки, шифрование, HTTP, БД
+external_sources/parson/    — JSON-парсер (собирается из исходников)
+external_libs/{ffmpeg,curl,openssl,postgresql}/    — Linux .so
+external_libs/windows/      — Windows .dll
+external_libs/macos/        — macOS .dylib
 ```
-
-## Внешние библиотеки
-
-Все внешние библиотеки находятся **в папке проекта** (`external_libs/`) и подключаются через CMake как `IMPORTED`-таргеты — `find_package` / `pkg-config` не используются. Единственные требования к системе — компилятор C11 (gcc/clang) и cmake.
-
-Runtime-поиск `.so` идёт через `RUNPATH` бинаря (`$ORIGIN/../external_libs/.../lib`) — не нужно ставить `LD_LIBRARY_PATH` или копировать библиотеки в систему.
-
-| Библиотека | Расположение | Назначение |
-|---|---|---|
-| parson | `external_sources/parson/` | JSON (сборка из исходников) |
-| FFmpeg | `external_libs/ffmpeg/` | Аудио/видео/изображения |
-| libcurl | `external_libs/curl/` | HTTP-запросы (Telegram API, Reddit API) |
-| OpenSSL | `external_libs/openssl/` | TLS для HTTP |
-| libpq | `external_libs/postgresql/` | PostgreSQL |
 
 ## Интегрированные модули
 

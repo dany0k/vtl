@@ -73,4 +73,14 @@ else()
     endif()
 endif()
 
+# Apple Silicon strict-проверка подписи — без ad-hoc codesign бинарь
+# падает с 'zsh: killed' при запуске.
+if(APPLE)
+    find_program(VTL_CODESIGN codesign REQUIRED)
+    add_custom_command(TARGET ${AppName} POST_BUILD
+        COMMAND "${VTL_CODESIGN}" --force --sign - "$<TARGET_FILE:${AppName}>"
+        VERBATIM
+    )
+endif()
+
 enable_testing()
