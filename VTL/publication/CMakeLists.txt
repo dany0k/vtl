@@ -6,7 +6,12 @@ add_library(VTL_publication OBJECT
     text/infra/VTL_publication_text_read.c
     text/infra/VTL_publication_text_write.c
     text/bbcode/VTL_publication_text_op_bbcode.c
+    text/asciidoc/VTL_publication_text_op_asciidoc.c
 )
+
+if(UNIX OR MINGW)
+    target_link_libraries(VTL_publication PUBLIC pthread)
+endif()
 
 target_include_directories(VTL_publication PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
