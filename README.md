@@ -5,6 +5,7 @@
 ## Возможности
 
 - **Текстовый пайплайн** — генерация текстовых файлов в форматах Telegram MarkdownV2, HTML, BBCode; отправка в Telegram
+- **AsciiDoc парсер** — параллельный (pthread) разбор 15 типов разметки в `MarkedText` с двумя уровнями параллелизма (по сканерам и по файлам)
 - **Аудио пайплайн** — чтение, перекодирование (FFmpeg) и отправка аудиофайлов с подписью в Telegram
 - **Видео** — структура для видеоконтейнеров и субтитров (SRT парсинг, наложение, конвертация, стилизация)
 - **Изображения** — обработка через FFmpeg (фильтры, утилиты)
@@ -22,13 +23,23 @@ cd vtl
 
 ### 2. Вариант A: Сборка из терминала (Linux / WSL Ubuntu)
 
+На чистой Ubuntu сначала поставьте toolchain:
+
+```bash
+sudo apt update
+sudo apt install build-essential cmake pkg-config
+```
+
+Затем собираем:
+
 ```bash
 mkdir build && cd build
 cmake ..
 cmake --build .
+cd ..
 ```
 
-Исполняемый файл появится в `app/VTL`.
+Исполняемый файл появится в `app/VTL` (в **корне проекта**, не в `build/app/` — поэтому перед запуском `cd ..`).
 
 ### 3. Вариант B: Сборка из CLion (Windows + WSL)
 
@@ -86,13 +97,21 @@ cmake --build .
 
 ### 4. Запуск
 
-Перед запуском создайте файл `text.md` в корне проекта с текстом публикации:
+#### Что должно лежать в корне проекта
 
-```
-Привет из VTL!
-```
+- **`text.md`** — текст публикации. Пример:
+  ```
+  Привет из VTL!
+  ```
+- **Три аудиофайла** (имена жёстко прописаны в `main.c`):
+  - `audio_ariel.mp3`
+  - `audio_styuardessa.mp3`
+  - `audio_xanadu.mp3`
 
-Задайте переменные окружения для Telegram:
+  Можно положить любые `mp3` с такими именами. Без них Audio Pipeline вернёт ошибку.
+  В репозиторий они **не закоммичены** (`*.mp3` исключены) — нужно положить вручную.
+
+#### Переменные окружения
 
 ```bash
 export TG_BOT_TOKEN="<токен бота>"
@@ -100,22 +119,36 @@ export TG_CHAT_ID="<id чата>"
 ./app/VTL
 ```
 
-Программа:
-1. Читает `text.md`, генерирует форматированные файлы (`.t_md`, `.html`)
-2. Отправляет текст как сообщение в Telegram
-3. Отправляет аудиофайл в Telegram с подписью из `text.md`
+**Получение `TG_BOT_TOKEN`:**
 
-Для получения `TG_CHAT_ID` — напишите боту в Telegram, затем:
+1. В Telegram напишите `@BotFather`
+2. Команда `/newbot`, задайте имя и username бота
+3. BotFather пришлёт токен вида `123456789:ABCdefGhIJklmNOpqrSTUvwxyz`
+
+**Получение `TG_CHAT_ID`:**
+
+Напишите своему боту любое сообщение, затем:
 ```bash
 curl https://api.telegram.org/bot<TOKEN>/getUpdates
 ```
 В ответе найдите `"chat":{"id": ...}`.
+
+#### Что делает программа
+
+1. **AsciiDoc демо** — парсит in-memory пример и печатает разбор по частям с флагами BOLD/ITALIC/STRIKE
+2. **Бенчмарк параллелизма** — Sequential vs Parallel для 15 сканеров (512 KB документ) и для batch'а (8 файлов × 128 KB), считает Speedup и Efficiency
+3. **Text Pipeline** — читает `text.md`, генерирует `.t_md` / `.html`, отправляет в Telegram
+4. **Audio Pipeline** — отправляет один из аудиофайлов в Telegram с подписью из `text.md`
 
 ## Структура проекта
 
 ```
 VTL/
   publication/           — пайплайн публикации (текст, аудио)
+    text/
+      asciidoc/          — параллельный парсер AsciiDoc
+      bbcode/            — парсер BBCode
+      infra/             — чтение/запись текстовых файлов
   content_platform/
     tg/                  — Telegram Bot API (sendMessage, sendAudio, sendMediaGroup, ...)
     reddit/              — Reddit API
@@ -162,4 +195,4 @@ external_libs/
 
 ## Авторы
 
-Команда проекта VTL, ТКСВ.
+Команда проекта VTL.
