@@ -37,17 +37,16 @@ cmake --build build
 ./app/VTL
 ```
 
-### Windows (нативно, без WSL/MSYS2)
+### Windows (нативно, без WSL/MSYS2/MinGW)
 
-#### Способ A — через Visual Studio (рекомендуется)
+Сборка идёт через **MSVC** — родной компилятор Windows из состава Visual Studio.
 
-Если уже установлена Visual Studio (Community/Professional) или Build Tools — больше ничего не нужно. CMake сам найдёт MSVC.
+Что должно быть установлено:
+- **Visual Studio Community** (бесплатная) — https://visualstudio.microsoft.com/downloads/ → при установке выбрать workload **"Desktop development with C++"**. С ним идут cl.exe, линкер и CMake (можно отметить отдельно).
 
-Если нет — поставь **Visual Studio Community** с https://visualstudio.microsoft.com/downloads/ (бесплатная), при установке выбери workload **"Desktop development with C++"**.
+Если CMake не был включён в установку Visual Studio, поставь его отдельно: https://cmake.org/download/ → `Windows x64 Installer`, при установке ✅ **"Add CMake to the system PATH"**.
 
-Также нужен **CMake** — скачай с https://cmake.org/download/ → `Windows x64 Installer`, при установке отметь ✅ **"Add CMake to the system PATH"**.
-
-После — обычная команда:
+Сборка:
 
 ```powershell
 git clone <url>
@@ -58,16 +57,6 @@ cmake --build build
 ```
 
 ⚠️ `.exe` появится в `app\Debug\VTL.exe` (или `app\Release\` если `cmake --build build --config Release`) — особенность VS-генератора.
-
-#### Способ B — через MinGW-w64 (альтернатива, если MSVC не подходит)
-
-Скачай с https://github.com/brechtsanders/winlibs_mingw/releases/latest архив `winlibs-x86_64-posix-seh-gcc-*-mingw-w64ucrt-*-rN.zip`. Распакуй в `C:\` → получится `C:\mingw64\`. Добавь `C:\mingw64\bin` в `Path` (Пуск → "Изменение переменных среды"). Перезапусти PowerShell.
-
-```powershell
-cmake -S . -B build -G "MinGW Makefiles"
-cmake --build build
-.\app\VTL.exe
-```
 
 ## Запуск
 
