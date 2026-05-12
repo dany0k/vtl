@@ -7,6 +7,10 @@ add_library(VTL_publication OBJECT
     text/infra/VTL_publication_text_write.c
     text/bbcode/VTL_publication_text_op_bbcode.c
     text/asciidoc/VTL_publication_text_op_asciidoc.c
+    text/asciidoc/VTL_publication_text_op_asciidoc_data.c
+    text/asciidoc/VTL_publication_text_op_asciidoc_scan.c
+    text/asciidoc/VTL_publication_text_op_asciidoc_convert.c
+    text/asciidoc/infra/VTL_publication_text_op_asciidoc_load.c
 )
 
 if(UNIX OR MINGW)
