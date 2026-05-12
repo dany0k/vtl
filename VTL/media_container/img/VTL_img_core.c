@@ -1,4 +1,4 @@
-#include "VTL_img_core.h"
+#include <VTL/media_container/img/VTL_img_core.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

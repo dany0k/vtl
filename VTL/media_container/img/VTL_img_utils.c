@@ -1,4 +1,4 @@
-#include "VTL_img_utils.h"
+#include <VTL/media_container/img/VTL_img_utils.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>

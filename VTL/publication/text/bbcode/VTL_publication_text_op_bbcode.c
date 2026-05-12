@@ -1,4 +1,4 @@
-#include "VTL_publication_text_op_bbcode.h"
+#include <VTL/publication/text/bbcode/VTL_publication_text_op_bbcode.h>
 
  size_t VTL_publication_text_bbcode_CountTextParts(const VTL_publication_Text *p_src_text)
 {
