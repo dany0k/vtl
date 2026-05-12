@@ -39,33 +39,35 @@ cmake --build build
 
 ### Windows (нативно, без WSL/MSYS2)
 
-Понадобится **CMake** и **MinGW-w64** (GCC под Windows).
+#### Способ A — через Visual Studio (рекомендуется)
 
-**1. CMake.** Скачай инсталлятор с https://cmake.org/download/ → `Windows x64 Installer`. При установке отметь ✅ **"Add CMake to the system PATH"**.
+Если уже установлена Visual Studio (Community/Professional) или Build Tools — больше ничего не нужно. CMake сам найдёт MSVC.
 
-**2. MinGW-w64.** Скачай с https://github.com/brechtsanders/winlibs_mingw/releases/latest архив вида `winlibs-x86_64-posix-seh-gcc-*-mingw-w64ucrt-*-rN.zip`. Распакуй в `C:\` → получится `C:\mingw64\`. Добавь `C:\mingw64\bin` в `Path`:
+Если нет — поставь **Visual Studio Community** с https://visualstudio.microsoft.com/downloads/ (бесплатная), при установке выбери workload **"Desktop development with C++"**.
 
-- Пуск → "Изменение системных переменных среды" → **Переменные среды**
-- В разделе **Пользователь** найти `Path` → **Изменить** → **Создать** → `C:\mingw64\bin` → OK везде
+Также нужен **CMake** — скачай с https://cmake.org/download/ → `Windows x64 Installer`, при установке отметь ✅ **"Add CMake to the system PATH"**.
 
-**3. Закрой PowerShell и открой заново** (иначе `gcc` не найдётся в PATH). Проверь:
-
-```powershell
-cmake --version
-gcc --version
-```
-
-**4. Собирай:**
+После — обычная команда:
 
 ```powershell
 git clone <url>
 cd vtl
+cmake -S . -B build
+cmake --build build
+.\app\Debug\VTL.exe
+```
+
+⚠️ `.exe` появится в `app\Debug\VTL.exe` (или `app\Release\` если `cmake --build build --config Release`) — особенность VS-генератора.
+
+#### Способ B — через MinGW-w64 (альтернатива, если MSVC не подходит)
+
+Скачай с https://github.com/brechtsanders/winlibs_mingw/releases/latest архив `winlibs-x86_64-posix-seh-gcc-*-mingw-w64ucrt-*-rN.zip`. Распакуй в `C:\` → получится `C:\mingw64\`. Добавь `C:\mingw64\bin` в `Path` (Пуск → "Изменение переменных среды"). Перезапусти PowerShell.
+
+```powershell
 cmake -S . -B build -G "MinGW Makefiles"
 cmake --build build
 .\app\VTL.exe
 ```
-
-Под MSVC проект тоже собирается (через Visual Studio Build Tools). CMake сам найдёт MSVC если он установлен. В этом случае команду `-G "MinGW Makefiles"` указывать не нужно.
 
 ## Запуск
 
