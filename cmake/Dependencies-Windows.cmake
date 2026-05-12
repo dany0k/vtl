@@ -1,15 +1,31 @@
-# Windows-сборка через MinGW-w64. Все .dll/.dll.a/.lib/.h лежат в external_libs/windows/.
+# Windows-сборка под MSVC и MinGW. Все .dll/.dll.a/.lib/.h лежат в external_libs/windows/.
 # Не зависит от MSYS2, vcpkg, system-installed libraries — всё в репо.
 #
 # Что лежит:
 #   external_libs/windows/bin/      — runtime DLL (копируются в app/ после билда)
-#   external_libs/windows/lib/      — import libraries (.dll.a, .lib)
+#   external_libs/windows/lib/      — import libraries: .lib для MSVC, .dll.a для MinGW
 #   external_libs/windows/include/  — headers
 
 set(WIN_DIR "${EXTERNAL_LIBS_DIR}/windows")
 set(WIN_BIN "${WIN_DIR}/bin")
 set(WIN_LIB "${WIN_DIR}/lib")
 set(WIN_INC "${WIN_DIR}/include")
+
+# MinGW и MSVC используют разный формат import library:
+#   MinGW читает .dll.a (GNU ar archive)
+#   MSVC читает .lib (COFF import library)
+# Сгенерённые из тех же DLL — оба варианта лежат рядом в external_libs/windows/lib/.
+if(MSVC)
+    set(_VTL_CURL_IMPLIB   "${WIN_LIB}/libcurl.lib")
+    set(_VTL_SSL_IMPLIB    "${WIN_LIB}/libssl.lib")
+    set(_VTL_CRYPTO_IMPLIB "${WIN_LIB}/libcrypto.lib")
+    set(_VTL_PQ_IMPLIB     "${WIN_LIB}/libpq.lib")
+else()
+    set(_VTL_CURL_IMPLIB   "${WIN_LIB}/libcurl.dll.a")
+    set(_VTL_SSL_IMPLIB    "${WIN_LIB}/libssl.dll.a")
+    set(_VTL_CRYPTO_IMPLIB "${WIN_LIB}/libcrypto.dll.a")
+    set(_VTL_PQ_IMPLIB     "${WIN_LIB}/libpq.dll.a")
+endif()
 
 # ============================================================
 # FFmpeg (DLL от BtbN/FFmpeg-Builds, формат avXXX-MAJOR.dll)
@@ -41,7 +57,7 @@ _vtl_win_ffmpeg(swresample  6)
 add_library(CURL::libcurl SHARED IMPORTED)
 set_target_properties(CURL::libcurl PROPERTIES
     IMPORTED_LOCATION "${WIN_BIN}/libcurl-4.dll"
-    IMPORTED_IMPLIB   "${WIN_LIB}/libcurl.dll.a"
+    IMPORTED_IMPLIB   "${_VTL_CURL_IMPLIB}"
     INTERFACE_INCLUDE_DIRECTORIES "${WIN_INC}"
 )
 
@@ -51,14 +67,14 @@ set_target_properties(CURL::libcurl PROPERTIES
 add_library(OpenSSL::Crypto SHARED IMPORTED)
 set_target_properties(OpenSSL::Crypto PROPERTIES
     IMPORTED_LOCATION "${WIN_BIN}/libcrypto-3-x64.dll"
-    IMPORTED_IMPLIB   "${WIN_LIB}/libcrypto.dll.a"
+    IMPORTED_IMPLIB   "${_VTL_CRYPTO_IMPLIB}"
     INTERFACE_INCLUDE_DIRECTORIES "${WIN_INC}"
 )
 
 add_library(OpenSSL::SSL SHARED IMPORTED)
 set_target_properties(OpenSSL::SSL PROPERTIES
     IMPORTED_LOCATION "${WIN_BIN}/libssl-3-x64.dll"
-    IMPORTED_IMPLIB   "${WIN_LIB}/libssl.dll.a"
+    IMPORTED_IMPLIB   "${_VTL_SSL_IMPLIB}"
     INTERFACE_INCLUDE_DIRECTORIES "${WIN_INC}"
     INTERFACE_LINK_LIBRARIES OpenSSL::Crypto
 )
@@ -69,7 +85,7 @@ set_target_properties(OpenSSL::SSL PROPERTIES
 add_library(PostgreSQL::PostgreSQL SHARED IMPORTED)
 set_target_properties(PostgreSQL::PostgreSQL PROPERTIES
     IMPORTED_LOCATION "${WIN_BIN}/libpq.dll"
-    IMPORTED_IMPLIB   "${WIN_LIB}/libpq.dll.a"
+    IMPORTED_IMPLIB   "${_VTL_PQ_IMPLIB}"
     INTERFACE_INCLUDE_DIRECTORIES "${WIN_INC}"
 )
 
