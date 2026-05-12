@@ -1,5 +1,7 @@
+#ifndef _WIN32
 #define _POSIX_C_SOURCE 200809L
 #define _XOPEN_SOURCE
+#endif
 #include <time.h>
 #include <stddef.h>
 #include <VTL/utils/VTL_time.h>

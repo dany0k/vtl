@@ -1,5 +1,7 @@
+#ifndef _WIN32
 #define _POSIX_C_SOURCE 200809L
 #define _XOPEN_SOURCE
+#endif
 #include <time.h>
 #include <string.h>
 #include <VTL/user/history/VTL_user_history_data.h>

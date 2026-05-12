@@ -1,4 +1,6 @@
+#ifndef _WIN32
 #define _POSIX_C_SOURCE 200809L
+#endif
 
 #include <VTL/publication/text/asciidoc/VTL_publication_text_op_asciidoc.h>
 

@@ -1,6 +1,10 @@
+#ifndef _WIN32
 #define _POSIX_C_SOURCE 200809L
+#endif
 
+#ifndef VTL_MINIMAL_BUILD
 #include <VTL/VTL.h>
+#endif
 #include <VTL/publication/text/asciidoc/VTL_publication_text_op_asciidoc.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -228,7 +232,13 @@ int main(void)
     bench_asciidoc_scanners(512, 50);
     bench_asciidoc_batch(128, 8, 20);
 
-    /* --- Существующий бизнес-пайплайн (без изменений) --- */
+#ifdef VTL_MINIMAL_BUILD
+    /* Minimal build: только AsciiDoc-парсер. Telegram/Reddit/FFmpeg/Postgres
+     * не собираются — программа заканчивается после демо и бенчей. */
+    printf("\n=== Minimal build — pipelines disabled ===\n");
+    return 0;
+#else
+    /* --- Существующий бизнес-пайплайн --- */
     const char* audio_files[] = {
         "audio_ariel.mp3",
         "audio_styuardessa.mp3",
@@ -252,4 +262,5 @@ int main(void)
         res_audio == VTL_res_kOk ? "OK" : "ERROR");
 
     return (res_text != VTL_res_kOk) ? res_text : res_audio;
+#endif
 }

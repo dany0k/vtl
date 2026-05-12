@@ -5,7 +5,6 @@
 ## Возможности
 
 - **Текстовый пайплайн** — генерация текстовых файлов в форматах Telegram MarkdownV2, HTML, BBCode; отправка в Telegram
-- **AsciiDoc парсер** — параллельный (pthread) разбор 15 типов разметки в `MarkedText` с двумя уровнями параллелизма (по сканерам и по файлам)
 - **Аудио пайплайн** — чтение, перекодирование (FFmpeg) и отправка аудиофайлов с подписью в Telegram
 - **Видео** — структура для видеоконтейнеров и субтитров (SRT парсинг, наложение, конвертация, стилизация)
 - **Изображения** — обработка через FFmpeg (фильтры, утилиты)
@@ -21,125 +20,59 @@ git clone <url-репозитория>
 cd vtl
 ```
 
-### 2. Установка зависимостей
+### 2. Сборка
 
-Выберите свою платформу.
+#### Toolchain
 
-#### Linux / WSL Ubuntu
+На любой Linux нужен только **компилятор C11 и CMake**. Никаких apt/brew/vcpkg-установок библиотек проекта.
 
-```bash
-sudo apt update
-sudo apt install build-essential cmake pkg-config \
-    libavcodec-dev libavformat-dev libavutil-dev libavfilter-dev \
-    libswscale-dev libswresample-dev \
-    libcurl4-openssl-dev libssl-dev libpq-dev
-```
+| Платформа | Команда установки toolchain |
+|---|---|
+| Ubuntu / Debian / WSL | `sudo apt install build-essential cmake` |
+| Fedora / RHEL | `sudo dnf install gcc make cmake` |
+| Arch | `sudo pacman -S base-devel cmake` |
 
-> Нет WSL под Windows? Поставьте: `wsl --install -d Ubuntu` (PowerShell от админа). Перезагрузка → задайте логин/пароль → повторите команды выше внутри Ubuntu.
-
-#### macOS
+#### Команда
 
 ```bash
-# Если нет Homebrew:
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-brew install cmake pkg-config ffmpeg curl openssl@3 postgresql@16
+cmake -S . -B build
+cmake --build build
+./run.sh
 ```
 
-Если CMake не найдёт `openssl` или `libpq` (они keg-only) — экспортируйте `PKG_CONFIG_PATH`:
+Все библиотеки берутся из `external_libs/` через `IMPORTED`-таргеты + `RUNPATH`. `run.sh` дополнительно ставит `LD_LIBRARY_PATH` — нужно для транзитивных FFmpeg-deps на Linux.
+
+⚠️ FFmpeg-shared-libs из `external_libs/` тянут транзитивно `libvpx`, `libdav1d`, `libopus`, `libmp3lame` и ещё ~50 опциональных кодеков. На обычной Ubuntu Desktop / любой dev-машине с мультимедиа-стеком они уже стоят. На голом server-Ubuntu без них программа упадёт на runtime — доставьте `apt install ffmpeg` (это подтянет deps, но не сами библиотеки проекта — те остаются из репо).
+
+#### Поддерживаемые платформы
+
+| Платформа | Полная сборка | Файлы в репо |
+|---|---|---|
+| Linux x86_64 (Ubuntu / Debian / Fedora / Arch) | ✅ | `external_libs/{ffmpeg,curl,openssl,postgresql}/lib/*.so` |
+| WSL Ubuntu | ✅ | (Linux x86_64 под капотом) |
+| Windows x86_64 (MinGW, например winlibs.com) | ✅ | `external_libs/windows/{bin,lib,include}/` |
+| macOS arm64 (Apple Silicon, Sonoma+) | ✅ | `external_libs/macos/{lib,include}/` |
+| Windows + MSVC | ❌ pthread не поддерживается | — |
+
+Под каждую систему — **та же команда** `cmake -S . -B build && cmake --build build`. CMake сам выбирает нужный набор `IMPORTED`-таргетов по `CMAKE_SYSTEM_NAME`.
 
 ```bash
-export PKG_CONFIG_PATH="$(brew --prefix openssl@3)/lib/pkgconfig:$(brew --prefix postgresql@16)/lib/pkgconfig:$PKG_CONFIG_PATH"
+# Linux (Ubuntu пример) — нужен только toolchain
+sudo apt install build-essential cmake
+cmake -S . -B build && cmake --build build
+./app/VTL
+
+# macOS — нужен Xcode Command Line Tools (даёт clang + cmake)
+xcode-select --install
+cmake -S . -B build && cmake --build build
+./app/VTL
+
+# Windows — нужен MinGW-w64 (например с winlibs.com — без MSYS2)
+cmake -S . -B build && cmake --build build
+.\app\VTL.exe
 ```
 
-#### Windows (нативно, без WSL)
-
-Нужен **MSYS2** (https://www.msys2.org/) — он даёт MinGW-w64 toolchain. Установите его, запустите **MSYS2 MinGW64** shell.
-
-Дальше два варианта установки библиотек.
-
-**Вариант 1 — pacman (рекомендуется).** Одна команда, готовые бинарники, ~1 минута.
-
-```bash
-pacman -Syu
-pacman -S --needed \
-    mingw-w64-x86_64-gcc \
-    mingw-w64-x86_64-cmake \
-    mingw-w64-x86_64-pkgconf \
-    mingw-w64-x86_64-ffmpeg \
-    mingw-w64-x86_64-curl \
-    mingw-w64-x86_64-openssl \
-    mingw-w64-x86_64-postgresql
-```
-
-<details>
-<summary><b>Вариант 2 — vcpkg</b> (если нужны фиксированные версии библиотек или manifest mode для команды/CI)</summary>
-
-vcpkg фиксирует версии через `vcpkg.json` + baseline → воспроизводимая сборка у всех. Минусы: первая установка ~30-60 мин (компилирует из исходников), ~5-10 GB на диске.
-
-В MSYS2 MinGW64 — только toolchain:
-```bash
-pacman -Syu
-pacman -S --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-pkgconf
-```
-
-В PowerShell — vcpkg + библиотеки:
-```powershell
-git clone https://github.com/microsoft/vcpkg C:\vcpkg
-C:\vcpkg\bootstrap-vcpkg.bat
-C:\vcpkg\vcpkg.exe install ffmpeg:x64-mingw-dynamic curl:x64-mingw-dynamic openssl:x64-mingw-dynamic libpq:x64-mingw-dynamic
-```
-</details>
-
-> ⚠️ Под MSVC проект **не собирается** — зависит от `pthread` (`if(UNIX OR MINGW)` в CMake). Используйте MinGW.
-
-### 3. Сборка
-
-#### Linux / WSL / macOS
-
-Из корня проекта:
-
-```bash
-mkdir build && cd build
-cmake ..
-cmake --build .
-cd ..
-```
-
-Бинарь — `app/VTL` (в **корне проекта**, не в `build/app/` — поэтому `cd ..`).
-
-#### Windows (MSYS2 MinGW64 shell)
-
-**Если ставили через pacman:**
-```bash
-cd /c/path/to/vtl
-mkdir build && cd build
-cmake .. -G "MinGW Makefiles"
-cmake --build .
-cd ..
-```
-
-**Если ставили через vcpkg:**
-```bash
-cd /c/path/to/vtl
-mkdir build && cd build
-cmake .. -G "MinGW Makefiles" \
-    -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
-    -DVCPKG_TARGET_TRIPLET=x64-mingw-dynamic
-cmake --build .
-cd ..
-```
-
-Бинарь — `app/VTL.exe`. Если при запуске ругается на отсутствие DLL — добавьте в `PATH`:
-
-```powershell
-# pacman:
-$env:PATH = "C:\msys64\mingw64\bin;$env:PATH"
-# vcpkg:
-$env:PATH = "C:\vcpkg\installed\x64-mingw-dynamic\bin;$env:PATH"
-```
-
-### 4. Сборка из CLion (опционально — для Windows-разработчиков через WSL)
+### 3. Сборка из CLion (опционально — для Windows через WSL)
 
 Если работаете в CLion на Windows и не хотите возиться с MinGW — собирайте через WSL-тулчейн.
 
@@ -178,7 +111,7 @@ $env:PATH = "C:\vcpkg\installed\x64-mingw-dynamic\bin;$env:PATH"
   ```
   Перезапустите: `wsl --shutdown`.
 
-### 5. Запуск
+### 4. Запуск
 
 #### Что должно лежать в корне проекта
 
@@ -218,10 +151,8 @@ curl https://api.telegram.org/bot<TOKEN>/getUpdates
 
 #### Что делает программа
 
-1. **AsciiDoc демо** — парсит in-memory пример и печатает разбор по частям с флагами BOLD/ITALIC/STRIKE
-2. **Бенчмарк параллелизма** — Sequential vs Parallel для 15 сканеров (512 KB документ) и для batch'а (8 файлов × 128 KB), считает Speedup и Efficiency
-3. **Text Pipeline** — читает `text.md`, генерирует `.t_md` / `.html`, отправляет в Telegram
-4. **Audio Pipeline** — отправляет один из аудиофайлов в Telegram с подписью из `text.md`
+1. **Text Pipeline** — читает `text.md`, генерирует `.t_md` / `.html`, отправляет в Telegram
+2. **Audio Pipeline** — отправляет один из аудиофайлов в Telegram с подписью из `text.md`
 
 ## Структура проекта
 
@@ -254,7 +185,9 @@ external_libs/
 
 ## Внешние библиотеки
 
-Все внешние библиотеки находятся в папке проекта и подключаются через CMake. Никаких системных зависимостей кроме стандартной libc и toolchain.
+Все внешние библиотеки находятся **в папке проекта** (`external_libs/`) и подключаются через CMake как `IMPORTED`-таргеты — `find_package` / `pkg-config` не используются. Единственные требования к системе — компилятор C11 (gcc/clang) и cmake.
+
+Runtime-поиск `.so` идёт через `RUNPATH` бинаря (`$ORIGIN/../external_libs/.../lib`) — не нужно ставить `LD_LIBRARY_PATH` или копировать библиотеки в систему.
 
 | Библиотека | Расположение | Назначение |
 |---|---|---|
