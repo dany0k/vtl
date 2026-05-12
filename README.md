@@ -65,7 +65,7 @@ cmake --build build
 .\app\VTL.exe
 ```
 
-Под MSVC проект **не собирается** — pthread не поддерживается. Только MinGW.
+Под MSVC проект тоже собирается (через Visual Studio Build Tools). CMake сам найдёт MSVC если он установлен. В этом случае команду `-G "MinGW Makefiles"` указывать не нужно.
 
 ## Запуск
 

@@ -1,7 +1,8 @@
 # Самодостаточная под-библиотека модуля publication.
 # Не зависит ни от utils, ни от curl/openssl/postgres/ffmpeg.
 # Используется при VTL_MINIMAL_BUILD=ON для сборки на чистой ОС.
-# Работает на Linux, macOS, Windows (MinGW). MSVC не поддерживается — pthread'а нет.
+# Работает на Linux, macOS, Windows (MinGW и MSVC) — threading через
+# собственный wrapper (Windows API на Windows, pthread на остальных).
 
 add_library(VTL_asciidoc STATIC
     VTL_publication_text_op_asciidoc.c

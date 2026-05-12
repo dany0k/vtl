@@ -9,10 +9,10 @@
 #include <VTL/VTL.h>
 #endif
 #include <VTL/publication/text/asciidoc/VTL_publication_text_op_asciidoc.h>
+#include <VTL/publication/text/asciidoc/VTL_publication_text_op_asciidoc_compat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -185,28 +185,23 @@ static void bench_asciidoc_batch(size_t doc_size_kb, size_t files, size_t iterat
     printf("\n=== File-Batch Parallelism (%zu files x %zu KB each, %zu iters) ===\n",
            files, doc_size_kb, iterations);
 
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    double t0 = (double)ts.tv_sec + ts.tv_nsec * 1e-9;
+    double t0 = vtl_monotonic_seconds();
     for (size_t k = 0; k < iterations; ++k) {
         VTL_asciidoc_ParseFileBatchSequential(paths, files, out);
         for (size_t i = 0; i < files; ++i) {
             if (out[i]) { free(out[i]->parts); free(out[i]); out[i] = NULL; }
         }
     }
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    double t_seq = ((double)ts.tv_sec + ts.tv_nsec * 1e-9) - t0;
+    double t_seq = vtl_monotonic_seconds() - t0;
 
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    t0 = (double)ts.tv_sec + ts.tv_nsec * 1e-9;
+    t0 = vtl_monotonic_seconds();
     for (size_t k = 0; k < iterations; ++k) {
         VTL_asciidoc_ParseFileBatchParallel(paths, files, out);
         for (size_t i = 0; i < files; ++i) {
             if (out[i]) { free(out[i]->parts); free(out[i]); out[i] = NULL; }
         }
     }
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    double t_par = ((double)ts.tv_sec + ts.tv_nsec * 1e-9) - t0;
+    double t_par = vtl_monotonic_seconds() - t0;
 
     long cpu_cores = detect_cpu_cores();
     /* Эффективный N — минимум из числа потоков и числа ядер CPU.
