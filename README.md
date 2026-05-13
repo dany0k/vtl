@@ -12,14 +12,17 @@
 
 ## Сборка
 
-Все библиотеки (FFmpeg, libcurl, OpenSSL, libpq) лежат прямо в `external_libs/`. **Нужен только компилятор и CMake** — никаких `apt install ffmpeg` / `brew install ffmpeg` / `vcpkg`.
+**Нужен только компилятор и CMake** — никаких глобальных `apt install ffmpeg` / `brew install ffmpeg` / `vcpkg install` / Python / meson / perl.
+
+- **Linux / macOS** — внешние либы (FFmpeg, libcurl, libpq) лежат как pre-built `.so` / `.dylib` в `external_libs/`
+- **Windows** — всё собирается из исходников в `external_sources/` через MSVC (FFmpeg, curl, libpq + NASM/VSNASM портативно в `external_sources/tools/`)
 
 ### Linux
 
 ```bash
 sudo apt install build-essential cmake
 cmake -S . -B build
-cmake --build build
+cmake --build build -j
 ./app/VTL
 ```
 
@@ -29,34 +32,60 @@ cmake --build build
 xcode-select --install
 brew install cmake
 cmake -S . -B build
-cmake --build build
+cmake --build build -j
 ./app/VTL
 ```
 
 ### Windows
 
-Сборка нативно через MSVC (Visual Studio). MinGW/MSYS2/WSL не требуются.
+Нативно через MSVC (Visual Studio 2022/2026). MinGW/MSYS2/WSL/Python не нужны.
 
 ```powershell
-cmake -S . -B build
-cmake --build build
+cmake -S . -B build-source -A x64
+cmake --build build-source --config Release -j
 .\app\VTL.exe
 ```
 
+Первая сборка идёт долго (~10–15 минут): собирается FFmpeg 7.1 (ShiftMediaProject) + libpq + curl. Последующие сборки инкрементальные.
+
 ## Запуск
 
-В корне проекта должны лежать:
+В корне проекта должны лежать input-файлы (в репо не закоммичены, положить вручную):
 
 - `text.md` — текст публикации
-- `audio_ariel.mp3`, `audio_styuardessa.mp3`, `audio_xanadu.mp3` — в репо не закоммичены, положить вручную
+- `audio_ariel.mp3`, `audio_styuardessa.mp3`, `audio_xanadu.mp3` — аудиофайлы
 
-Переменные окружения для Telegram:
+Переменные окружения для Telegram (без них `Text Pipeline` / `Audio Pipeline` упадут на старте):
+
+### Linux / macOS
 
 ```bash
 export TG_BOT_TOKEN="<токен от @BotFather>"
 export TG_CHAT_ID="<id из getUpdates>"
 ./app/VTL
 ```
+
+### Windows (PowerShell)
+
+```powershell
+$env:TG_BOT_TOKEN = "<токен от @BotFather>"
+$env:TG_CHAT_ID   = "<id из getUpdates>"
+.\app\VTL.exe
+```
+
+### Windows (cmd.exe)
+
+```cmd
+set TG_BOT_TOKEN=<токен от @BotFather>
+set TG_CHAT_ID=<id из getUpdates>
+app\VTL.exe
+```
+
+Получить значения:
+- `TG_BOT_TOKEN` — у [@BotFather](https://t.me/BotFather), команда `/newbot`
+- `TG_CHAT_ID` — отправить сообщение боту, дёрнуть `https://api.telegram.org/bot<TOKEN>/getUpdates`, скопировать `chat.id` из ответа
+
+Без переменных всё что **до** публикации (AsciiDoc-парсер, бенчмарки параллелизма) отработает и покажет вывод — это удобно для проверки сборки.
 
 ## Структура проекта
 
@@ -67,10 +96,22 @@ VTL/
   media_container/    — аудио, видео, субтитры, изображения
   user/               — история публикаций
   utils/              — файлы, строки, шифрование, HTTP, БД
-external_sources/parson/                          — JSON-парсер
-external_libs/{ffmpeg,curl,openssl,postgresql}/   — Linux .so
-external_libs/windows/                            — Windows .dll + .lib (MSVC)
-external_libs/macos/                              — macOS .dylib
+external_libs/                    — pre-built бинари для Linux/macOS
+  linux/                          — .so для Linux
+  macos/                          — .dylib для macOS
+external_sources/                 — исходники для source-build (Windows)
+  parson/                         — JSON-парсер (используется везде)
+  curl/                           — curl 8.x (Schannel TLS)
+  libpq/                          — postgresql 18.3 (libpq client)
+  ffmpeg/                         — FFmpeg 7.1 (ShiftMediaProject build)
+  zlib/                           — zlib (для опциональных FFmpeg кодеков)
+  tools/                          — NASM + VSNASM (для FFmpeg .asm)
+cmake/
+  Dependencies-{Windows,MacOS}.cmake — диспетчер зависимостей по платформам
+  libpq/                          — собственный CMakeLists.txt для libpq под MSVC
+    generated/                    — pre-generated headers (kwlist_d.h, pg_config*.h, ...)
+  scripts/                        — bat/ps1 для FFmpeg source build
+msvc/                             — артефакты FFmpeg-сборки (генерится локально, не в git)
 ```
 
 ## Интегрированные модули
