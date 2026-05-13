@@ -222,6 +222,15 @@ static void bench_asciidoc_batch(size_t doc_size_kb, size_t files, size_t iterat
 
 int main(void)
 {
+#ifdef _WIN32
+    /* Кириллица в printf — UTF-8 в исходниках. Дефолтная codepage консоли
+     * (cmd/PowerShell) — OEM (cp866 в RU-локали), отсюда крякозябры.
+     * Переключаем codepage процесса на UTF-8 — нативно для Windows Terminal
+     * и работает в любом host'е, кто умеет UTF-8 (а это все актуальные). */
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
+
     srand((unsigned)time(NULL));
 
     demo_asciidoc_parser();
