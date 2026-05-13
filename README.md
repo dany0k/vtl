@@ -69,7 +69,7 @@ VTL/
   utils/              — файлы, строки, шифрование, HTTP, БД
 external_sources/parson/                          — JSON-парсер
 external_libs/{ffmpeg,curl,openssl,postgresql}/   — Linux .so
-external_libs/windows/                            — Windows .dll + .lib (MSVC) / .dll.a (MinGW)
+external_libs/windows/                            — Windows .dll + .lib (MSVC)
 external_libs/macos/                              — macOS .dylib
 ```
 

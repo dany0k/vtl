@@ -13,7 +13,7 @@ add_library(VTL_publication OBJECT
     text/asciidoc/infra/VTL_publication_text_op_asciidoc_load.c
 )
 
-if(UNIX OR MINGW)
+if(UNIX)
     target_link_libraries(VTL_publication PUBLIC pthread)
 endif()
 

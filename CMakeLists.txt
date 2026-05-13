@@ -46,11 +46,6 @@ if(UNIX)
     target_link_libraries(${AppName} PRIVATE dl)
 endif()
 
-# MinGW: clock_gettime/pthread живут в нашем libwinpthread из external_libs
-if(MINGW)
-    target_link_libraries(${AppName} PRIVATE VTL::winpthread)
-endif()
-
 # Apple Silicon strict-проверка подписи — без ad-hoc codesign бинарь
 # падает с 'zsh: killed' при запуске.
 if(APPLE)

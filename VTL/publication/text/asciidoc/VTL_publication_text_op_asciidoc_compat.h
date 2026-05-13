@@ -3,7 +3,7 @@
 
 // Тонкий слой совместимости — потоки и монотонные часы.
 // Под Linux/macOS используем pthread + clock_gettime,
-// под Windows — нативное WinAPI (работает и в MinGW, и в MSVC).
+// под Windows — нативное WinAPI (CreateThread + QueryPerformanceCounter).
 // Никаких внешних зависимостей.
 
 #ifdef _WIN32

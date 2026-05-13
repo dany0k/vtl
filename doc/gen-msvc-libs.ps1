@@ -11,9 +11,9 @@ param(
 #   кладёт рядом в external_libs/windows/lib/.
 #
 # Зачем:
-#   В external_libs у нас лежат MinGW-формата .dll.a (от Fedora mingw64-*),
-#   MSVC такой формат не читает (LNK1107). Сгенерированный .lib и .dll.a
-#   ссылаются на одну и ту же DLL — рантайм-поведение идентично.
+#   FFmpeg/curl/openssl/libpq DLL в external_libs/windows/bin/ предсобраны MinGW'ом
+#   и не несут .lib в комплекте. MSVC напрямую с DLL не линкуется — нужен import
+#   library (.lib). Этот скрипт собирает .lib из exports DLL через dumpbin + lib.
 #
 # Эта утилита не вызывается из CMake. Готовые .lib коммитятся в репо.
 # Требует dumpbin.exe и lib.exe — оба есть только в Developer Command Prompt for VS.

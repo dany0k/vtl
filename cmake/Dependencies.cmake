@@ -4,8 +4,8 @@
 #
 # Поддерживаемые платформы:
 #   Linux x86_64      → external_libs/{ffmpeg,curl,openssl,postgresql}/lib/*.so
-#   Windows x86_64    → external_libs/windows/{bin,lib,include}/  (MinGW)
-#   macOS             → пока не поддерживается (нет .dylib в репо)
+#   Windows x86_64    → external_libs/windows/{bin,lib,include}/  (MSVC)
+#   macOS arm64       → external_libs/macos/lib/*.dylib
 
 set(EXTERNAL_LIBS_DIR "${CMAKE_SOURCE_DIR}/external_libs")
 
@@ -22,7 +22,7 @@ endif()
 if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
     message(FATAL_ERROR
         "external_libs/ под ${CMAKE_SYSTEM_NAME} пока нет. "
-        "Поддерживается Linux x86_64, Windows x86_64 (MinGW), macOS arm64.")
+        "Поддерживается Linux x86_64, Windows x86_64 (MSVC), macOS arm64.")
 endif()
 
 # ============================================================
