@@ -40,7 +40,7 @@
  * Тестовые данные — типичные строки субтитров с ASS-тегами
  * ------------------------------------------------------------------------- */
 #define BENCH_LINE_COUNT 500
-#define BENCH_REPEATS    10
+#define BENCH_REPEATS    100
 
 static const char* BENCH_SAMPLES[] = {
     "{\\b1}Привет, мир!{\\b0}",
