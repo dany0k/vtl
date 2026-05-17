@@ -1,3 +1,4 @@
+add_subdirectory(sub/opencl)
 add_subdirectory(img)
 
 add_library(VTL_media_container OBJECT
