@@ -135,6 +135,8 @@ msvc/                             — артефакты FFmpeg-сборки (г
 | borisenkov-reddit | Борисенков | Reddit API, HTTP-клиент |
 | zmaev-vimeo | Змаев | Vimeo (TUS upload, метаданные, приватность, плеер, обложки, главы) |
 | polev-img-update | Полев | Обработка изображений (FFmpeg filter graph, PNG-энкодинг, параллельный batch) |
+| pr-15-mediawiki | Прядченко | MediaWiki-парсер (inline-разметка, заголовки, ссылки, шаблоны, параллельная обработка) |
+| shevtsov-sheduler | Шевцов | Scheduler публикаций (PostgreSQL очередь, metadata JSON, dispatcher TG/Reddit/VK) |
 
 ## Авторы
 
