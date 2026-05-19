@@ -20,6 +20,18 @@ add_executable(${VTL_CMAKE_TESTS_MW_APP_NAME}
     ${CMAKE_SOURCE_DIR}/VTL/publication/text/mediawiki/VTL_publication_text_op_mediawiki_data.c
     ${CMAKE_SOURCE_DIR}/VTL/publication/text/mediawiki/VTL_publication_text_op_mediawiki_scan.c
     ${CMAKE_SOURCE_DIR}/VTL/publication/text/mediawiki/VTL_publication_text_op_mediawiki_convert.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/telegram/VTL_publication_text_op_telegram.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/telegram/VTL_publication_text_op_telegram_data.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/telegram/VTL_publication_text_op_telegram_scan.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/telegram/VTL_publication_text_op_telegram_convert.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/markdown/VTL_publication_text_op_markdown.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/markdown/VTL_publication_text_op_markdown_data.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/markdown/VTL_publication_text_op_markdown_scan.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/markdown/VTL_publication_text_op_markdown_convert.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/html/VTL_publication_text_op_html.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/html/VTL_publication_text_op_html_data.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/html/VTL_publication_text_op_html_scan.c
+    ${CMAKE_SOURCE_DIR}/VTL/publication/text/html/VTL_publication_text_op_html_convert.c
     ${CMAKE_SOURCE_DIR}/VTL/publication/text/VTL_publication_markup_text_flags_check.c
     ${CMAKE_SOURCE_DIR}/VTL/publication/text/VTL_publication_text_op.c
 )
