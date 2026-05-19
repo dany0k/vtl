@@ -15,4 +15,23 @@
    static inline void vtl_thread_join(vtl_thread_t t) { pthread_join(t,NULL); }
 #endif
 
+/* Монотонный таймер - для замеров времени */
+#ifdef _WIN32
+static inline double vtl_monotonic_seconds(void)
+{
+    LARGE_INTEGER freq, count;
+    QueryPerformanceFrequency(&freq);
+    QueryPerformanceCounter(&count);
+    return (double)count.QuadPart / (double)freq.QuadPart;
+}
+#else
+#  include <time.h>
+static inline double vtl_monotonic_seconds(void)
+{
+   struct timespec ts;
+   clock_gettime(CLOCK_MONOTONIC, &ts);
+   return (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
+}
+#endif
+
 #endif /* VTL_PUBLICATION_TEXT_OP_DISCORD_COMPAT_H */
