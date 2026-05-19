@@ -138,6 +138,7 @@ msvc/                             — артефакты FFmpeg-сборки (г
 | pr-15-mediawiki | Прядченко | MediaWiki-парсер (inline-разметка, заголовки, ссылки, шаблоны, параллельная обработка) |
 | shevtsov-sheduler | Шевцов | Scheduler публикаций (PostgreSQL очередь, metadata JSON, dispatcher TG/Reddit/VK) |
 | text | Иванников | Текстовые форматы: HTML/Markdown/Telegram MD парсеры и сериализаторы (параллельные сканеры bold/italic/strike) |
+| feat-user-user-history | Черникова | Администрирование истории пользователя (CRUD через PostgreSQL, encryptor, просмотр) |
 
 ## Авторы
 
