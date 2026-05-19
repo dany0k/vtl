@@ -2,6 +2,7 @@ add_library(VTL_user OBJECT
     VTL_user_data.c
     history/VTL_user_history_data.c
     history/db/VTL_user_history_save.c
+    db/VTL_user_db.c
 )
 
 target_include_directories(VTL_user PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

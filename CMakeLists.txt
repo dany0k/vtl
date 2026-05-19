@@ -30,6 +30,7 @@ add_subdirectory(VTL/user)
 add_subdirectory(VTL/publication)
 add_subdirectory(VTL/media_container)
 add_subdirectory(VTL/content_platform)
+add_subdirectory(VTL/history_administration)
 
 find_package(Threads REQUIRED)
 
@@ -40,6 +41,7 @@ target_link_libraries(${AppName} PRIVATE
     VTL_content_platform
     VTL_publication
     VTL_media_container
+    VTL_history_administration
     VTL_user
     VTL_utils
     Threads::Threads

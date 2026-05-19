@@ -8,6 +8,7 @@ add_library(VTL_utils OBJECT
     db/VTL_db_credentals.c
     db/VTL_db_connection.c
     db/VTL_db_executor.c
+    db/VTL_db.c
 )
 
 target_include_directories(VTL_utils PUBLIC ${CMAKE_SOURCE_DIR})
