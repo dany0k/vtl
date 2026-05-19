@@ -23,6 +23,8 @@ include(cmake/Dependencies.cmake)
 
 add_subdirectory(external_sources/parson)
 
+add_subdirectory(VTL/utils/threading)
+add_subdirectory(VTL/scheduler)
 add_subdirectory(VTL/utils)
 add_subdirectory(VTL/user)
 add_subdirectory(VTL/publication)
@@ -34,6 +36,7 @@ find_package(Threads REQUIRED)
 add_executable(${AppName} main.c)
 
 target_link_libraries(${AppName} PRIVATE
+    VTL_scheduler
     VTL_content_platform
     VTL_publication
     VTL_media_container

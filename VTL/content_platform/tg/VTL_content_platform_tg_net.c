@@ -1,12 +1,5 @@
 #include <VTL/content_platform/tg/VTL_content_platform_tg_net.h>
 
-#ifndef TG_BOT_TOKEN
-#define TG_BOT_TOKEN "8517247017:AAFJWJWaE3Tb5VfDYm93M9819mTNVXgoM_E"
-#endif
-#ifndef TG_CHAT_ID
-#define TG_CHAT_ID "639267858"
-#endif
-
 #include <curl/curl.h>
 #include <parson/parson.h>
 #include <VTL/utils/curl/VTL_http_client.h>
@@ -16,20 +9,31 @@
 #include <ctype.h>
 
 
-// Initialize API data (token, chat_id). Env vars override the compile-time defaults.
+// Инициализация API-данных из env. Токен и chat_id берутся только из env —
+// никаких compile-time дефолтов с реальными credentials в исходниках.
 static void VTL_content_platform_tg_ApiDataInit(VTL_net_api_data_TG* p) {
     const char* tok = getenv("TG_BOT_TOKEN");
-    p->token = (tok && *tok) ? tok : TG_BOT_TOKEN;
+    if (!tok || !*tok) {
+        fprintf(stderr, "[error] TG_BOT_TOKEN is not set or empty.\n");
+        exit(EXIT_FAILURE);
+    }
+    p->token = tok;
     const char* cid = getenv("TG_CHAT_ID");
-    p->chat_id = (cid && *cid) ? cid : TG_CHAT_ID;
+    if (!cid || !*cid) {
+        fprintf(stderr, "[error] TG_CHAT_ID is not set or empty.\n");
+        exit(EXIT_FAILURE);
+    }
+    p->chat_id = cid;
     p->text = NULL;
     p->parse_mode = NULL;
 }
 
-//VTL_content_platform_tg_PrepareBaseUrl
-// Build base URL "https://api.telegram.org/bot<token>/"
-static int VTL_content_platform_tg_PrepareBaseUrl(VTL_net_api_data_TG* api, char* buf, size_t sz) {
-    int n = snprintf(buf, sz, "https://api.telegram.org/bot%s/", api->token);
+// Сборка полного URL Telegram-API с методом, безопасная по bounds.
+static int VTL_content_platform_tg_PrepareApiUrl(VTL_net_api_data_TG* api,
+                                                 const char* method,
+                                                 char* buf, size_t sz) {
+    int n = snprintf(buf, sz, "https://api.telegram.org/bot%s/%s",
+                     api->token, method);
     return (n < 0 || (size_t)n >= sz) ? -1 : 0;
 }
 
@@ -47,24 +51,27 @@ static int VTL_content_platform_tg_http_post_json(const char* url, JSON_Value* b
     return ok;
 }
 
-// Load file content into memory
+// Чтение файла в malloc-буфер с проверками fseek/ftell/fread.
 static char* VTL_content_platform_tg_LoadFile(const char* path) {
-    FILE* f = fopen(path, "rb"); if (!f) return NULL;
-    fseek(f, 0, SEEK_END);
-    long sz = ftell(f); fseek(f, 0, SEEK_SET);
-    char* buf = malloc(sz + 1);
+    FILE* f = fopen(path, "rb");
+    if (!f) return NULL;
+    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return NULL; }
+    long sz = ftell(f);
+    if (sz < 0) { fclose(f); return NULL; }
+    if (fseek(f, 0, SEEK_SET) != 0) { fclose(f); return NULL; }
+    char* buf = malloc((size_t)sz + 1);
     if (!buf) { fclose(f); return NULL; }
-    fread(buf, 1, sz, f);
-    buf[sz] = '\0';
+    size_t n = fread(buf, 1, (size_t)sz, f);
     fclose(f);
+    if (n != (size_t)sz) { free(buf); return NULL; }
+    buf[sz] = '\0';
     return buf;
 }
 
 // Send a single text message (no length checks; up to Telegram's 4096-char hard limit).
 static int VTL_content_platform_tg_SendMessageRaw(VTL_net_api_data_TG* api, const char* text, size_t len) {
     char url[512];
-    if (VTL_content_platform_tg_PrepareBaseUrl(api, url, sizeof(url))) return 0;
-    strcat(url, "sendMessage");
+    if (VTL_content_platform_tg_PrepareApiUrl(api, "sendMessage", url, sizeof(url))) return 0;
     char* tmp = (char*)malloc(len + 1);
     if (!tmp) return 0;
     memcpy(tmp, text, len);
@@ -220,8 +227,7 @@ VTL_AppResult VTL_content_platform_tg_marked_text_SendNow(const VTL_Filename fil
 static int VTL_content_platform_tg_SendMedia(VTL_net_api_data_TG* api, const char* method, const char* field)
 {
     char url[512];
-    if (VTL_content_platform_tg_PrepareBaseUrl(api, url, sizeof(url))) return 0;
-    strcat(url, method);
+    if (VTL_content_platform_tg_PrepareApiUrl(api, method, url, sizeof(url))) return 0;
 
     struct curl_httppost *form = NULL, *last = NULL;
 
@@ -283,7 +289,7 @@ VTL_AppResult VTL_content_platform_tg_audio_w_marked_text_SendNow(const VTL_File
     char* txt = VTL_content_platform_tg_LoadFile(text_file_name);
     if (!txt) return VTL_res_kErr;
     api_data.text = txt;
-    api_data.parse_mode = NULL;
+    api_data.parse_mode = "MarkdownV2";
     int ok = VTL_content_platform_tg_SendMedia(&api_data, "sendAudio", "audio");
     free(txt);
     return ok ? VTL_res_kOk : VTL_res_kErr;
@@ -434,8 +440,7 @@ static int VTL_content_platform_tg_SendMediaGroup(
     const char*           caption
 ) {
     char url[512];
-    if (VTL_content_platform_tg_PrepareBaseUrl(api, url, sizeof(url))) return 0;
-    strcat(url, "sendMediaGroup");
+    if (VTL_content_platform_tg_PrepareApiUrl(api, "sendMediaGroup", url, sizeof(url))) return 0;
 
     JSON_Value *arr_val = json_value_init_array();
     JSON_Array *arr = json_value_get_array(arr_val);
@@ -579,12 +584,17 @@ VTL_AppResult VTL_content_platform_tg_mediagroup_document_SendNow(
 }
 
 
-// Media group only animation (e.g., GIF)
+// Media group only animation (e.g., GIF). Telegram API не принимает animation
+// в sendMediaGroup, поэтому отправляем по одной. Возвращаем первую ошибку.
 VTL_AppResult VTL_content_platform_tg_mediagroup_animation_SendNow(
     const VTL_Filename file_names[], size_t file_count)
 {
     VTL_net_api_data_TG api_data; INIT();
+    (void) api_data;
+    VTL_AppResult result = VTL_res_kOk;
     for (size_t i = 0; i < file_count; ++i) {
-    VTL_content_platform_tg_animation_SendNow(file_names[i]);
+        VTL_AppResult r = VTL_content_platform_tg_animation_SendNow(file_names[i]);
+        if (r != VTL_res_kOk && result == VTL_res_kOk) result = r;
     }
+    return result;
 }
