@@ -1,6 +1,6 @@
 # VTL — Video/Text/Audio publication Library
 
-Библиотека на C11 для автоматической публикации медиаконтента (текст, аудио, видео, изображения) в Telegram, Reddit и другие платформы.
+Библиотека на C11 для автоматической публикации медиаконтента (текст, аудио, видео, изображения) в Telegram, Reddit, Vimeo и другие платформы.
 
 ## Возможности
 
@@ -8,6 +8,7 @@
 - Аудио: чтение, перекодирование через FFmpeg, отправка с подписью
 - Видео и субтитры: SRT парсинг, наложение, конвертация
 - Изображения: фильтры и утилиты через FFmpeg
+- Vimeo: TUS resumable upload видео, метаданные, приватность, плеер, домены встраивания, обложки, главы
 - Reddit API, история публикаций в PostgreSQL
 
 ## Сборка
@@ -55,21 +56,26 @@ cmake --build build-source --config Release -j
 - `text.md` — текст публикации
 - `audio_ariel.mp3`, `audio_styuardessa.mp3`, `audio_xanadu.mp3` — аудиофайлы
 
-Переменные окружения для Telegram (без них `Text Pipeline` / `Audio Pipeline` упадут на старте):
+Переменные окружения:
+
+- `TG_BOT_TOKEN`, `TG_CHAT_ID` — для Telegram (без них `Text Pipeline` / `Audio Pipeline` упадут на старте)
+- `VIMEO_ACCESS_TOKEN` — для Vimeo (нужен только если используешь vimeo-функции; без него вернётся `VTL_res_vimeo_kMissingToken`)
 
 ### Linux / macOS
 
 ```bash
 export TG_BOT_TOKEN="<токен от @BotFather>"
 export TG_CHAT_ID="<id из getUpdates>"
+export VIMEO_ACCESS_TOKEN="<personal access token>"
 ./app/VTL
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-$env:TG_BOT_TOKEN = "<токен от @BotFather>"
-$env:TG_CHAT_ID   = "<id из getUpdates>"
+$env:TG_BOT_TOKEN       = "<токен от @BotFather>"
+$env:TG_CHAT_ID         = "<id из getUpdates>"
+$env:VIMEO_ACCESS_TOKEN = "<personal access token>"
 .\app\VTL.exe
 ```
 
@@ -78,12 +84,14 @@ $env:TG_CHAT_ID   = "<id из getUpdates>"
 ```cmd
 set TG_BOT_TOKEN=<токен от @BotFather>
 set TG_CHAT_ID=<id из getUpdates>
+set VIMEO_ACCESS_TOKEN=<personal access token>
 app\VTL.exe
 ```
 
 Получить значения:
 - `TG_BOT_TOKEN` — у [@BotFather](https://t.me/BotFather), команда `/newbot`
 - `TG_CHAT_ID` — отправить сообщение боту, дёрнуть `https://api.telegram.org/bot<TOKEN>/getUpdates`, скопировать `chat.id` из ответа
+- `VIMEO_ACCESS_TOKEN` — [Vimeo Developer](https://developer.vimeo.com/apps) → создать app → Personal Access Token со скоупами `upload`, `edit`, `private`, `video_files`
 
 Без переменных всё что **до** публикации (AsciiDoc-парсер, бенчмарки параллелизма) отработает и покажет вывод — это удобно для проверки сборки.
 
@@ -92,7 +100,7 @@ app\VTL.exe
 ```
 VTL/
   publication/        — пайплайн публикации (текст, аудио)
-  content_platform/   — Telegram, Reddit
+  content_platform/   — Telegram, Reddit, Vimeo
   media_container/    — аудио, видео, субтитры, изображения
   user/               — история публикаций
   utils/              — файлы, строки, шифрование, HTTP, БД
@@ -125,6 +133,7 @@ msvc/                             — артефакты FFmpeg-сборки (г
 | ishatalov | Ишаталов | БД (PostgreSQL) |
 | fedorov-subtitles-macOS | Федоров | Субтитры (SRT парсинг, наложение, конвертация, стили) |
 | borisenkov-reddit | Борисенков | Reddit API, HTTP-клиент |
+| zmaev-vimeo | Змаев | Vimeo (TUS upload, метаданные, приватность, плеер, обложки, главы) |
 
 ## Авторы
 
