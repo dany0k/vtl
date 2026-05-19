@@ -11,10 +11,10 @@ extern "C"
 #include <VTL/VTL_app_result.h>
 
 // Вывести одну публикацию подробно
-void VTL_show_PublicationDetailed(const VTL_UserHistory* history);
+void VTL_show_PublicationDetailed(const VTL_HistoryRecord* history);
 
 // Вывести одну публикацию кратко (одна строка)
-void VTL_show_PublicationShort(const VTL_UserHistory* history);
+void VTL_show_PublicationShort(const VTL_HistoryRecord* history);
 
 // Вывести заголовок таблицы
 void VTL_show_TableHeader(void);

@@ -15,12 +15,12 @@ extern "C"
 VTL_AppResult VTL_history_administration_CreateTable(VTL_Database* db);
 
 // Вставить одну публикацию
-VTL_AppResult VTL_history_administration_Insert(VTL_Database* db, VTL_UserHistory* history);
+VTL_AppResult VTL_history_administration_Insert(VTL_Database* db, VTL_HistoryRecord* history);
 
 // Вставить запланированную публикацию
 VTL_AppResult VTL_history_administration_InsertScheduled(
     VTL_Database* db,
-    VTL_UserHistory* history,
+    VTL_HistoryRecord* history,
     VTL_Time scheduled_time
 );
 

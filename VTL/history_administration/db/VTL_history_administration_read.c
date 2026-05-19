@@ -173,7 +173,7 @@ VTL_AppResult VTL_history_administration_ShowByStatus(VTL_Database* db, VTL_Publ
 
 // ==================== FindById ====================
 
-VTL_AppResult VTL_history_administration_FindById(VTL_Database* db, int id, VTL_UserHistory* history) {
+VTL_AppResult VTL_history_administration_FindById(VTL_Database* db, int id, VTL_HistoryRecord* history) {
     char sql[512];
     snprintf(sql, sizeof(sql),
         "%s WHERE id = %d", BASE_SELECT, id);
@@ -186,7 +186,7 @@ VTL_AppResult VTL_history_administration_FindById(VTL_Database* db, int id, VTL_
         return VTL_res_kErr;
     }
 
-    memset(history, 0, sizeof(VTL_UserHistory));
+    memset(history, 0, sizeof(VTL_HistoryRecord));
     history->id = atoi(PQgetvalue(res, 0, 0));
     snprintf(history->user.nickname, sizeof(history->user.nickname), "%s", PQgetvalue(res, 0, 1));
     history->publication_type = atoi(PQgetvalue(res, 0, 2));

@@ -28,7 +28,7 @@ VTL_AppResult VTL_history_administration_ShowByPlatform(VTL_Database* db, VTL_Pl
 VTL_AppResult VTL_history_administration_ShowByStatus(VTL_Database* db, VTL_PublicationStatus status);
 
 // Найти одну запись по ID
-VTL_AppResult VTL_history_administration_FindById(VTL_Database* db, int id, VTL_UserHistory* history);
+VTL_AppResult VTL_history_administration_FindById(VTL_Database* db, int id, VTL_HistoryRecord* history);
 
 // Экспорт всей истории в CSV файл
 VTL_AppResult VTL_history_administration_DownloadAll(VTL_Database* db);

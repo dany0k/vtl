@@ -42,7 +42,7 @@ VTL_AppResult VTL_history_administration_CreateTable(VTL_Database* db) {
     return VTL_res_kOk;
 }
 
-VTL_AppResult VTL_history_administration_Insert(VTL_Database* db, VTL_UserHistory* history) {
+VTL_AppResult VTL_history_administration_Insert(VTL_Database* db, VTL_HistoryRecord* history) {
     char time_buf[64];
     time_to_sql(&history->publication_start_time, time_buf, sizeof(time_buf));
 
@@ -82,7 +82,7 @@ VTL_AppResult VTL_history_administration_Insert(VTL_Database* db, VTL_UserHistor
 
 VTL_AppResult VTL_history_administration_InsertScheduled(
         VTL_Database* db,
-        VTL_UserHistory* history,
+        VTL_HistoryRecord* history,
         VTL_Time scheduled_time) {
 
     history->publication_start_time = scheduled_time;

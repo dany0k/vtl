@@ -29,9 +29,9 @@ static const char* type_to_string(VTL_PublicationType type) {
     }
 }
 
-static void history_base_init(VTL_UserHistory* history, const VTL_User* user,
+static void history_base_init(VTL_HistoryRecord* history, const VTL_User* user,
                                VTL_Platform platform, VTL_content_platform_flags flags) {
-    memset(history, 0, sizeof(VTL_UserHistory));
+    memset(history, 0, sizeof(VTL_HistoryRecord));
     history->id = 0;
     history->user = *user;
     history->platform = platform;
@@ -45,7 +45,7 @@ static void history_base_init(VTL_UserHistory* history, const VTL_User* user,
 }
 
 void VTL_user_history_text_publication_Init(
-        VTL_UserHistory* history,
+        VTL_HistoryRecord* history,
         const VTL_User* user,
         const VTL_Filename text_file_name,
         VTL_Platform platform,
@@ -58,7 +58,7 @@ void VTL_user_history_text_publication_Init(
 }
 
 void VTL_user_history_media_publication_Init(
-        VTL_UserHistory* history,
+        VTL_HistoryRecord* history,
         const VTL_User* user,
         const VTL_Filename media_file_name,
         VTL_Platform platform,
@@ -71,7 +71,7 @@ void VTL_user_history_media_publication_Init(
 }
 
 void VTL_user_history_media_w_text_publication_Init(
-        VTL_UserHistory* history,
+        VTL_HistoryRecord* history,
         const VTL_User* user,
         const VTL_Filename text_file_name,
         const VTL_Filename media_file_name,
@@ -87,7 +87,7 @@ void VTL_user_history_media_w_text_publication_Init(
 }
 
 void VTL_user_history_scheduled_Init(
-        VTL_UserHistory* history,
+        VTL_HistoryRecord* history,
         const VTL_User* user,
         const VTL_Filename text_file_name,
         const VTL_Filename media_file_name,
@@ -118,16 +118,16 @@ void VTL_user_history_scheduled_Init(
     history->status = VTL_PUBLICATION_SCHEDULED;
 }
 
-void VTL_user_history_SetStatus(VTL_UserHistory* history, VTL_PublicationStatus status) {
+void VTL_user_history_SetStatus(VTL_HistoryRecord* history, VTL_PublicationStatus status) {
     history->status = status;
 }
 
-void VTL_history_administration_Zeroize(VTL_UserHistory* history) {
+void VTL_history_administration_Zeroize(VTL_HistoryRecord* history) {
     VTL_user_Zeroize(&history->user);
-    memset(history, 0, sizeof(VTL_UserHistory));
+    memset(history, 0, sizeof(VTL_HistoryRecord));
 }
 
-void VTL_user_history_Print(const VTL_UserHistory* history) {
+void VTL_user_history_Print(const VTL_HistoryRecord* history) {
     char time_buf[64];
     strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M:%S", &history->publication_start_time);
 

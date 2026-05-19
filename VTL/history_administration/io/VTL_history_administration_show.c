@@ -70,7 +70,7 @@ void VTL_show_TableHeader(void) {
     VTL_show_Separator();
 }
 
-void VTL_show_PublicationShort(const VTL_UserHistory* history) {
+void VTL_show_PublicationShort(const VTL_HistoryRecord* history) {
     char time_buf[64];
     format_time(history->publication_start_time, time_buf, sizeof(time_buf));
 
@@ -84,7 +84,7 @@ void VTL_show_PublicationShort(const VTL_UserHistory* history) {
            time_buf);
 }
 
-void VTL_show_PublicationDetailed(const VTL_UserHistory* history) {
+void VTL_show_PublicationDetailed(const VTL_HistoryRecord* history) {
     char time_buf[64];
     format_time(history->publication_start_time, time_buf, sizeof(time_buf));
 
@@ -215,7 +215,7 @@ VTL_AppResult VTL_show_UserHistoryInteractive(VTL_Database* db) {
     printf("\nFound %d publications for @%s\n", rows, nickname);
 
     for (int i = 0; i < rows; i++) {
-        VTL_UserHistory h;
+        VTL_HistoryRecord h;
         memset(&h, 0, sizeof(h));
 
         h.id = atoi(PQgetvalue(res, i, 0));
@@ -331,7 +331,7 @@ VTL_AppResult VTL_show_AdminMenu(VTL_Database* db) {
                 int id;
                 printf("Enter publication ID: ");
                 scanf("%d", &id);
-                VTL_UserHistory found;
+                VTL_HistoryRecord found;
                 if (VTL_history_administration_FindById(db, id, &found) == VTL_res_kOk) {
                     VTL_show_PublicationDetailed(&found);
                 }

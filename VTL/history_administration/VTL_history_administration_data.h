@@ -35,7 +35,7 @@ typedef enum _VTL_PublicationStatus {
     VTL_PUBLICATION_FAILED    = 3    // Ошибка публикации
 } VTL_PublicationStatus;
 
-typedef struct _VTL_UserHistory {
+typedef struct _VTL_HistoryRecord {
     int id;                                  // ID записи в БД
     VTL_User user;                           // Пользователь
     VTL_Time user_start_time;                // Время регистрации пользователя
@@ -48,13 +48,13 @@ typedef struct _VTL_UserHistory {
     VTL_PublicationType publication_type;     // Тип публикации
     VTL_Platform platform;                   // Куда опубликовано
     VTL_PublicationStatus status;            // Статус
-} VTL_UserHistory;
+} VTL_HistoryRecord;
 
 // === Инициализация ===
 
 // Публикация только текста
 void VTL_user_history_text_publication_Init(
-    VTL_UserHistory* history,
+    VTL_HistoryRecord* history,
     const VTL_User* user,
     const VTL_Filename text_file_name,
     VTL_Platform platform,
@@ -63,7 +63,7 @@ void VTL_user_history_text_publication_Init(
 
 // Публикация только медиа
 void VTL_user_history_media_publication_Init(
-    VTL_UserHistory* history,
+    VTL_HistoryRecord* history,
     const VTL_User* user,
     const VTL_Filename media_file_name,
     VTL_Platform platform,
@@ -72,7 +72,7 @@ void VTL_user_history_media_publication_Init(
 
 // Публикация медиа + текст
 void VTL_user_history_media_w_text_publication_Init(
-    VTL_UserHistory* history,
+    VTL_HistoryRecord* history,
     const VTL_User* user,
     const VTL_Filename text_file_name,
     const VTL_Filename media_file_name,
@@ -82,7 +82,7 @@ void VTL_user_history_media_w_text_publication_Init(
 
 // Запланированная публикация
 void VTL_user_history_scheduled_Init(
-    VTL_UserHistory* history,
+    VTL_HistoryRecord* history,
     const VTL_User* user,
     const VTL_Filename text_file_name,
     const VTL_Filename media_file_name,
@@ -92,13 +92,13 @@ void VTL_user_history_scheduled_Init(
 );
 
 // Обновить статус
-void VTL_user_history_SetStatus(VTL_UserHistory* history, VTL_PublicationStatus status);
+void VTL_user_history_SetStatus(VTL_HistoryRecord* history, VTL_PublicationStatus status);
 
 // Очистка
-void VTL_history_administration_Zeroize(VTL_UserHistory* history);
+void VTL_history_administration_Zeroize(VTL_HistoryRecord* history);
 
 // Печать
-void VTL_user_history_Print(const VTL_UserHistory* history);
+void VTL_user_history_Print(const VTL_HistoryRecord* history);
 
 
 
