@@ -7,7 +7,7 @@
 - Текст: Telegram MarkdownV2, HTML, BBCode → отправка в Telegram
 - Аудио: чтение, перекодирование через FFmpeg, отправка с подписью
 - Видео и субтитры: SRT парсинг, наложение, конвертация
-- Изображения: фильтры и утилиты через FFmpeg
+- Изображения: фильтры FFmpeg (`buffer`/`buffersink` graph), PNG-энкодинг, параллельный batch processing
 - Vimeo: TUS resumable upload видео, метаданные, приватность, плеер, домены встраивания, обложки, главы
 - Reddit API, история публикаций в PostgreSQL
 
@@ -134,6 +134,7 @@ msvc/                             — артефакты FFmpeg-сборки (г
 | fedorov-subtitles-macOS | Федоров | Субтитры (SRT парсинг, наложение, конвертация, стили) |
 | borisenkov-reddit | Борисенков | Reddit API, HTTP-клиент |
 | zmaev-vimeo | Змаев | Vimeo (TUS upload, метаданные, приватность, плеер, обложки, главы) |
+| polev-img-update | Полев | Обработка изображений (FFmpeg filter graph, PNG-энкодинг, параллельный batch) |
 
 ## Авторы
 
