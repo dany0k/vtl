@@ -102,13 +102,16 @@ VTL/
   publication/        — пайплайн публикации (текст, аудио)
   content_platform/   — Telegram, Reddit, Vimeo
   media_container/    — аудио, видео, субтитры, изображения
+    encoding/         — видеоэнкодер (FFmpeg H.264/H.265/AV1, опционально Vulkan)
   user/               — история публикаций
   utils/              — файлы, строки, шифрование, HTTP, БД
+    auth/             — ed25519 wrapper (keypair, sign/verify)
 external_libs/                    — pre-built бинари для Linux/macOS
   linux/                          — .so для Linux
   macos/                          — .dylib для macOS
 external_sources/                 — исходники для source-build (Windows)
   parson/                         — JSON-парсер (используется везде)
+  ed25519/                        — orlp/ed25519 (vendored для VTL_auth)
   curl/                           — curl 8.x (Schannel TLS)
   libpq/                          — postgresql 18.3 (libpq client)
   ffmpeg/                         — FFmpeg 7.1 (ShiftMediaProject build)
@@ -135,6 +138,11 @@ msvc/                             — артефакты FFmpeg-сборки (г
 | borisenkov-reddit | Борисенков | Reddit API, HTTP-клиент |
 | zmaev-vimeo | Змаев | Vimeo (TUS upload, метаданные, приватность, плеер, обложки, главы) |
 | polev-img-update | Полев | Обработка изображений (FFmpeg filter graph, PNG-энкодинг, параллельный batch) |
+| pr-15-mediawiki | Прядченко | MediaWiki-парсер (inline-разметка, заголовки, ссылки, шаблоны, параллельная обработка) |
+| shevtsov-sheduler | Шевцов | Scheduler публикаций (PostgreSQL очередь, metadata JSON, dispatcher TG/Reddit/VK) |
+| text | Иванников | Текстовые форматы: HTML/Markdown/Telegram MD парсеры и сериализаторы (параллельные сканеры bold/italic/strike) |
+| feat-user-user-history | Черникова | Администрирование истории пользователя (CRUD через PostgreSQL, encryptor, просмотр) |
+| feature/envode | Мамонов | Видеоэнкодер (FFmpeg H.264/H.265/AV1, опциональный Vulkan) + аутентификация Ed25519 (keypair, sign/verify) |
 
 ## Авторы
 
