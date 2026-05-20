@@ -1,5 +1,3 @@
-find_package(OpenCL QUIET)
-
 add_library(VTL_discord STATIC
     VTL_publication_text_op_discord.c
     VTL_publication_text_op_discord_convert.c

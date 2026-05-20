@@ -1,5 +1,5 @@
-#ifndef VTL_PUBLICATION_TEXT_OP_DISCORD_H
-#define VTL_PUBLICATION_TEXT_OP_DISCORD_H
+#ifndef _VTL_PUBLICATION_TEXT_OP_DISCORD_H
+#define _VTL_PUBLICATION_TEXT_OP_DISCORD_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,4 +61,4 @@ VTL_AppResult VTL_discord_SerializeToText(const VTL_publication_MarkedText *src,
 }
 #endif
 
-#endif /* VTL_PUBLICATION_TEXT_OP_DISCORD_H */
+#endif /* _VTL_PUBLICATION_TEXT_OP_DISCORD_H */

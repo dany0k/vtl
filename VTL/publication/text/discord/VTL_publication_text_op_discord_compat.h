@@ -1,5 +1,5 @@
-#ifndef VTL_PUBLICATION_TEXT_OP_DISCORD_COMPAT_H
-#define VTL_PUBLICATION_TEXT_OP_DISCORD_COMPAT_H
+#ifndef _VTL_PUBLICATION_TEXT_OP_DISCORD_COMPAT_H
+#define _VTL_PUBLICATION_TEXT_OP_DISCORD_COMPAT_H
 
 /* Потоки: pthread на UNIX, WinAPI на Windows */
 #ifdef _WIN32
@@ -34,4 +34,4 @@ static inline double vtl_monotonic_seconds(void)
 }
 #endif
 
-#endif /* VTL_PUBLICATION_TEXT_OP_DISCORD_COMPAT_H */
+#endif /* _VTL_PUBLICATION_TEXT_OP_DISCORD_COMPAT_H */
