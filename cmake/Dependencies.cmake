@@ -75,17 +75,19 @@ set_target_properties(CURL::libcurl PROPERTIES
 )
 
 # ============================================================
-# libpq (PostgreSQL)
+# libpq (PostgreSQL) — заглушка
 # ============================================================
-set(PG_LIB_DIR "${EXTERNAL_LIBS_DIR}/postgresql/lib")
-set(PG_INC_DIR "${EXTERNAL_LIBS_DIR}/postgresql/include")
-
-_vtl_ensure_soname("${PG_LIB_DIR}" "libpq.so.5.16" "libpq.so.5")
-
-add_library(PostgreSQL::PostgreSQL SHARED IMPORTED)
+# Бандленный external_libs/postgresql/lib/libpq.so.5.16 тащит libssl.so.X,
+# libgssapi_krb5.so.X, libldap.so.X — на чистой системе их нет → ld.so падает
+# с "libssl.so: cannot open shared object file".
+#
+# То же, что с FFmpeg и curl: пустой INTERFACE-таргет. Заголовки доступны для
+# компиляции, .so не подтягивается. PQ*-вызовы становятся unresolved
+# (ignore-all внизу). Runtime DB-вызовы → SIGSEGV. История/планировщик
+# временно нерабочие, MediaWiki/AsciiDoc-пайплайны их не зовут.
+add_library(PostgreSQL::PostgreSQL INTERFACE IMPORTED)
 set_target_properties(PostgreSQL::PostgreSQL PROPERTIES
-    IMPORTED_LOCATION "${PG_LIB_DIR}/libpq.so.5.16"
-    INTERFACE_INCLUDE_DIRECTORIES "${PG_INC_DIR}"
+    INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_LIBS_DIR}/postgresql/include"
 )
 
 # ============================================================
@@ -107,8 +109,6 @@ endif()
 # Бинарь app/VTL должен находить .so в external_libs/<pkg>/lib/ во время запуска.
 # Используем $ORIGIN — относительный путь от бинаря.
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH
-    "\$ORIGIN/../external_libs/postgresql/lib"
-)
+set(CMAKE_INSTALL_RPATH "")
 
-message(STATUS "VTL dependencies: libpq 5 (FFmpeg и curl — заглушки, видео и сеть временно нерабочие)")
+message(STATUS "VTL dependencies: всё заглушено (FFmpeg/curl/libpq) — runtime-вызовы упадут, кроме text-pipeline (MediaWiki/AsciiDoc)")
