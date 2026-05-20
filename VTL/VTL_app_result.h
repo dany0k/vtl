@@ -8,7 +8,7 @@ extern "C"
 
 
 
-typedef enum _VTL_AppResult 
+typedef enum _VTL_AppResult
 {
     VTL_res_kOk = 0,
     VTL_res_kErr = -1,
@@ -71,6 +71,13 @@ typedef enum _VTL_AppResult
 
     VTL_res_style_kJsonParseError = 240,
 
+    VTL_res_vimeo_kMissingToken = 260,
+    VTL_res_vimeo_kHttpPostError,
+    VTL_res_vimeo_kHttpPatchError,
+    VTL_res_vimeo_kTusUploadError,
+    VTL_res_vimeo_kJsonParseError,
+    VTL_res_vimeo_kMissingUploadLink
+
 } VTL_AppResult;
 
 
@@ -79,6 +86,7 @@ typedef enum _VTL_AppResult
 #ifdef __cplusplus
 }
 #endif
+
 
 
 #endif

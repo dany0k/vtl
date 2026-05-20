@@ -22,23 +22,33 @@ endforeach()
 include(cmake/Dependencies.cmake)
 
 add_subdirectory(external_sources/parson)
+add_subdirectory(external_sources/ed25519)
 
+add_subdirectory(VTL/utils/threading)
+add_subdirectory(VTL/utils/auth)
+add_subdirectory(VTL/scheduler)
 add_subdirectory(VTL/utils)
 add_subdirectory(VTL/user)
 add_subdirectory(VTL/publication)
 add_subdirectory(VTL/media_container)
+add_subdirectory(VTL/media_container/encoding)
 add_subdirectory(VTL/content_platform)
+add_subdirectory(VTL/history_administration)
 
 find_package(Threads REQUIRED)
 
 add_executable(${AppName} main.c)
 
 target_link_libraries(${AppName} PRIVATE
+    VTL_scheduler
     VTL_content_platform
     VTL_publication
     VTL_media_container
+    VTL_media_container_encoding
+    VTL_history_administration
     VTL_user
     VTL_utils
+    VTL_utils_auth
     Threads::Threads
 )
 
@@ -57,3 +67,13 @@ if(APPLE)
 endif()
 
 enable_testing()
+add_subdirectory(VTL/test)
+
+add_test(
+    NAME VTL_mediawiki_pipeline
+    COMMAND ${AppName} --mediawiki ${CMAKE_SOURCE_DIR}/text.wiki
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+set_tests_properties(VTL_mediawiki_pipeline PROPERTIES
+    PASS_REGULAR_EXPRESSION "Text Pipeline \\(MediaWiki"
+)

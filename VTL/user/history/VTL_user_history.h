@@ -7,8 +7,8 @@ extern "C"
 #endif
 
 
-#include <VTL/user/history/db/VTL_user_history_save.h>
-#include <VTL/user/history/db/VTL_user_history_credentals.h>
+#include <VTL/user/history/db/VTL_user_history_db_save.h>
+#include <VTL/user/history/db/VTL_user_history_db_credentials.h>
 #include <VTL/user/history/VTL_user_history_data.h>
 
 

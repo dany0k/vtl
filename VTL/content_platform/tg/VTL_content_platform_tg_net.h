@@ -8,7 +8,7 @@ extern "C"
 
 #include <VTL/publication/VTL_publication_data.h>
 #include <VTL/user/VTL_user_data.h>
-#include <VTL/utils/VTL_time.h>
+#include <VTL/utils/VTL_utils_time.h>
 #include <VTL/VTL_app_result.h>
 
 

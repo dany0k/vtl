@@ -8,7 +8,7 @@ extern "C"
 #endif
 
 
-#include <VTL/media_container/sub/VTL_sub_data.h>
+#include <VTL/media_container/sub/VTL_media_container_sub_data.h>
 #include <string.h>
 
 void VTL_sub_tg_SetParams(VTL_sub_Params *p_new_params, const VTL_sub_Params *p_old_params);

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <VTL/content_platform/reddit/VTL_content_platform_reddit_net.h>
-#include <VTL/utils/http_client.h>
+#include <VTL/utils/curl/VTL_utils_curl_http_client_simple.h>
 
 static char VTL_access_token[512] = "";
 

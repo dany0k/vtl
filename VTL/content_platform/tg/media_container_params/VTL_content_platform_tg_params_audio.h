@@ -7,7 +7,7 @@ extern "C"
 #endif
 
 
-#include <VTL/media_container/audio/VTL_audio_data.h>
+#include <VTL/media_container/audio/VTL_media_container_audio_data.h>
 #include <string.h>
 
 void VTL_audio_tg_SetParams(VTL_audio_Params *p_new_params, const VTL_audio_Params *p_old_params);

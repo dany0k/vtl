@@ -1,13 +1,14 @@
 add_library(VTL_utils OBJECT
-    VTL_time.c
-    VTL_file.c
-    VTL_encryptor.c
-    log/VTL_console_log.c
-    curl/VTL_http_client.c
-    http_client.c
-    db/VTL_db_credentals.c
-    db/VTL_db_connection.c
-    db/VTL_db_executor.c
+    VTL_utils_time.c
+    VTL_utils_file.c
+    VTL_utils_encryptor.c
+    log/VTL_utils_log_console.c
+    curl/VTL_utils_curl_http_client.c
+    curl/VTL_utils_curl_http_client_simple.c
+    db/VTL_utils_db_credentials.c
+    db/VTL_utils_db_connection.c
+    db/VTL_utils_db_executor.c
+    db/VTL_utils_db.c
 )
 
 target_include_directories(VTL_utils PUBLIC ${CMAKE_SOURCE_DIR})

@@ -8,7 +8,7 @@ add_library(VTL_asciidoc STATIC
     VTL_publication_text_op_asciidoc_data.c
     VTL_publication_text_op_asciidoc_scan.c
     VTL_publication_text_op_asciidoc_convert.c
-    infra/VTL_publication_text_op_asciidoc_load.c
+    infra/VTL_publication_text_op_asciidoc_infra_load.c
     # Парсер использует типы VTL_publication_Text / MarkedText
     # из publication/text/VTL_publication_text_data.h — поэтому подключаем
     # data.c (структуры без внешних зависимостей).

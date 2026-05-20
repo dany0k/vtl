@@ -9,7 +9,7 @@ extern "C"
 #include <VTL/publication/text/asciidoc/VTL_publication_text_op_asciidoc_data.h>
 #include <VTL/publication/text/asciidoc/VTL_publication_text_op_asciidoc_scan.h>
 #include <VTL/publication/text/asciidoc/VTL_publication_text_op_asciidoc_convert.h>
-#include <VTL/publication/text/asciidoc/infra/VTL_publication_text_op_asciidoc_load.h>
+#include <VTL/publication/text/asciidoc/infra/VTL_publication_text_op_asciidoc_infra_load.h>
 
 
 

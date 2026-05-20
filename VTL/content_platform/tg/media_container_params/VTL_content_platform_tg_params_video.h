@@ -7,7 +7,7 @@ extern "C"
 #endif
 
 
-#include <VTL/media_container/video/VTL_video_data.h>
+#include <VTL/media_container/video/VTL_media_container_video_data.h>
 #include <string.h>
 
 

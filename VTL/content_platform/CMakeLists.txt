@@ -5,11 +5,13 @@ add_library(VTL_content_platform OBJECT
     tg/media_container_params/VTL_content_platform_tg_params_audio.c
     tg/media_container_params/VTL_content_platform_tg_params_sub.c
     tg/media_container_params/VTL_content_platform_tg_params_video.c
+    vimeo/VTL_content_platform_vimeo_net.c
+    vimeo/media_container_params/VTL_content_platform_vimeo_params_video.c
     reddit/VTL_content_platform_reddit_net.c
-    infra/audio/VTL_audio_gen.c
-    infra/audio/VTL_audio_configs_for_gen_init.c
-    infra/text/VTL_publication_text_gen.c
-    infra/text/VTL_text_configs_for_gen_init.c
+    infra/audio/VTL_content_platform_infra_audio_gen.c
+    infra/audio/VTL_content_platform_infra_audio_configs_for_gen_init.c
+    infra/text/VTL_content_platform_infra_text_gen.c
+    infra/text/VTL_content_platform_infra_text_configs_for_gen_init.c
 )
 
 target_include_directories(VTL_content_platform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

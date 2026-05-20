@@ -6,11 +6,11 @@ extern "C"
 {
 #endif
 
-#include <VTL/media_container/audio/VTL_audio.h>
-#include <VTL/media_container/sub/VTL_sub.h>
-#include <VTL/media_container/video/VTL_video.h>
+#include <VTL/media_container/audio/VTL_media_container_audio.h>
+#include <VTL/media_container/sub/VTL_media_container_sub.h>
+#include <VTL/media_container/video/VTL_media_container_video.h>
 
-#include <VTL/utils/VTL_file.h>
+#include <VTL/utils/VTL_utils_file.h>
 #include <VTL/VTL_app_result.h>
 
 

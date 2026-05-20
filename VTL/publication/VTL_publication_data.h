@@ -7,7 +7,7 @@ extern "C"
 #endif
 
 #include <VTL/publication/text/VTL_publication_text_data.h>
-#include <VTL/utils/VTL_file.h>
+#include <VTL/utils/VTL_utils_file.h>
 
 
 typedef struct _VTL_publication_image_Block
