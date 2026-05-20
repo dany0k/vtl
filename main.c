@@ -8,6 +8,8 @@
 #include <VTL/VTL.h>
 #include <VTL/publication/text/asciidoc/VTL_publication_text_op_asciidoc.h>
 #include <VTL/publication/text/asciidoc/VTL_publication_text_op_asciidoc_compat.h>
+#include <VTL_auth.h>
+#include <VTL_vencode.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -74,6 +76,43 @@ static char* build_large_asciidoc(size_t target_kb, size_t* out_len)
     buf[pos] = '\0';
     *out_len = pos;
     return buf;
+}
+
+
+/* Демонстрация модулей из PR #14 (Дмитрий):
+ *   - VTL_auth (ed25519 sign/verify): генерируем keypair, проверяем round-trip
+ *     подписи на коротком challenge.
+ *   - VTL_vencode (FFmpeg-based encoder): вызываем Init/Deinit с дефолтной
+ *     конфигурацией — без реального encoding, только проверка что либа линкуется
+ *     и базовый init/teardown не падает. Реальный encoding включится когда
+ *     video-pipeline будет к этому готов. */
+static void demo_pr14_modules(void)
+{
+    printf("\n=== Демо новых модулей PR #14 (auth + encoding) ===\n");
+
+    VTL_auth_keypair_t keypair;
+    int rc = VTL_auth_generate_keypair(&keypair);
+    if (rc != VTL_AUTH_SUCCESS) {
+        printf("  VTL_auth: ошибка генерации keypair (rc=%d)\n", rc);
+    } else {
+        const unsigned char challenge[] = "vtl-auth-demo-challenge";
+        const size_t challenge_len = sizeof(challenge) - 1;
+        unsigned char signature[VTL_AUTH_SIGNATURE_SIZE];
+        VTL_auth_client_respond(signature, challenge, challenge_len, &keypair);
+        int ok = VTL_auth_server_verify(signature, challenge, challenge_len,
+                                        keypair.public_key);
+        printf("  VTL_auth: keypair сгенерирован, подпись round-trip = %s\n",
+               ok ? "OK" : "FAIL");
+    }
+
+    VTL_vencode_Config cfg = { 0 };
+    cfg.log_level = 0;
+    cfg.thread_count = 0;
+    cfg.flags = VTL_VENCODE_FLAG_NONE;
+    VTL_AppResult vres = VTL_vencode_Init(&cfg);
+    printf("  VTL_vencode: init = %d (%s)\n",
+           (int)vres, vres == VTL_res_kOk ? "OK" : "noop/err");
+    VTL_vencode_Deinit();
 }
 
 
@@ -238,6 +277,7 @@ int main(int argc, char** argv)
     VTL_publication_marked_text_MarkupType markup =
         use_mediawiki ? VTL_markup_type_kMediaWiki : VTL_markup_type_kTelegramMD;
 
+    demo_pr14_modules();
     demo_asciidoc_parser();
     bench_asciidoc_scanners(512, 50);
     bench_asciidoc_batch(128, 8, 20);
